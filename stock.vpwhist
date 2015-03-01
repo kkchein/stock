@@ -1,0 +1,45 @@
+[Global]
+CurrentProject=stock.vpj
+[ProjectDates]
+stock.vpj=20150130021800756
+[ActiveConfig]
+stock.vpj=Debug
+[TreeExpansion2]
+- stock.vpj
+  - Source Files
+  - Other Files
+scroll:0
+[State]
+SCREEN: 1366 768 -1364 324 1364 726 0 0 M 0 0 0 0 1415 645 0
+CWD: ..\stock
+BUFFER: BN="PyqtQevent.py"
+BI: MA=1 74 1  TABS=1 5  WWS=1 IWT=0 ST=0 IN=2 BW=0 US=32000 RO=0 SE=1 SN=0 BIN=0 MN=Python	HM=0 MF=0 TL=0 MLL=0 ASE=0 LNL=1 LCF=6 CAPS=0 E=0 ESBU2=8 CL="" SC="" SCE= SCU=
+VIEW: LN=.643 CL=13 LE=0 CX=13 CY=19 WI=5 BI=24 HT=0 HN=0 HF=0 HC=4
+BUFFER: BN="drawQuote.py"
+BI: MA=1 74 1  TABS=1 5  WWS=1 IWT=0 ST=0 IN=2 BW=0 US=32000 RO=0 SE=1 SN=0 BIN=0 MN=Python	HM=0 MF=0 TL=0 MLL=0 ASE=0 LNL=1 LCF=6 CAPS=0 E=0 ESBU2=8 CL="" SC="" SCE= SCU=
+VIEW: LN=.4575 CL=108 LE=30 CX=78 CY=19 WI=5 BI=25 HT=0 HN=0 HF=0 HC=4
+BUFFER: BN="dataAnalysis.py"
+BI: MA=1 74 1  TABS=1 5  WWS=1 IWT=0 ST=0 IN=2 BW=0 US=32000 RO=0 SE=1 SN=0 BIN=0 MN=Python	HM=0 MF=608 TL=0 MLL=0 ASE=0 LNL=1 LCF=6 CAPS=0 E=0 ESBU2=8 CL="" SC="" SCE= SCU=
+VIEW: LN=.962 CL=27 LE=0 CX=27 CY=13 WI=5 BI=23 HT=0 HN=0 HF=0 HC=4
+WINDOW: 40 50 1096 451 -1 -1 N  WF=0 WT=4 ",,,"
+BUFFER: BN="PyqtQevent.py"
+VIEW: LN=.643 CL=13 LE=0 CX=16 CY=19 WI=182 BI=24 HT=0 HN=0 HF=0 HC=4
+WINDOW: 80 100 1096 443 -1 -1 N  WF=0 WT=1 ",,,"
+BUFFER: BN="drawQuote.py"
+VIEW: LN=.4575 CL=108 LE=30 CX=82 CY=19 WI=184 BI=25 HT=0 HN=0 HF=0 HC=4
+WINDOW: 20 25 1096 443 -1 -1 M  WF=0 WT=2 ",,,"
+BUFFER: BN="dataAnalysis.py"
+VIEW: LN=.962 CL=27 LE=0 CX=30 CY=13 WI=186 BI=23 HT=0 HN=0 HF=0 HC=4
+FILEHIST: 9
+gf_content.txt
+stock2.py
+pyqtDrawLine.py
+practice.py
+stock3.py
+googleFinance.py
+dataAnalysis.py
+PyqtQevent.py
+drawQuote.py
+DEBUG2: 0
+PROJECT_CACHE: 0
+TBCLASS: 0 0
