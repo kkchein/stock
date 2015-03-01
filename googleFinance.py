@@ -6,6 +6,7 @@ import re
 import datetime
 import csv
 import time
+import sys
 
 #"https://www.google.com/finance/historical?q=TPE:TAIEX&startdate=1/1/1985&start=0&num=30"
 
@@ -93,7 +94,10 @@ class GFClass():
         Returns:
         Raises:
         """
-        lastdt=ilist[len(ilist)-1][0]+datetime.timedelta(days=1)
+        if len(ilist)>0:
+            lastdt=ilist[len(ilist)-1][0]+datetime.timedelta(days=1)
+        else:
+            lastdt=datetime.datetime(1985, 1, 1, 0, 0, 0)
         self.getHistoryData(ilist, isymbol, lastdt)
     def urlData2List (self, idata, odata):
         """convert google data to data
@@ -136,7 +140,10 @@ class GFClass():
         Returns:
         Raises:
         """
-        csvFileR=open(icsvfilename, "r")
+        try:
+            csvFileR=open(icsvfilename, "r")
+        except FileNotFoundError:
+            return
         csvContent=csv.reader(csvFileR, delimiter=',')
         for i in csvContent:
             dt = datetime.datetime.fromtimestamp(time.mktime(time.strptime(i[0], self.dataStrType)))
@@ -182,20 +189,29 @@ class GFClass():
                              str(idata[icount][4]),
                              str(idata[icount][5])])
         csvFileW.close
-
+def symbol2Filename (isymbol):
+    return symbolstr.replace(":","")+".csv"
 if __name__ == "__main__":
-    #symbolstr="TPE:TAIEX"
-    symbolstr="TPE:2330"
-    filename=symbolstr.replace(":","")+".csv"
-    #symbolstr="TPE:TAIEX"
+    symbollist=["TPE:2330",
+                "TPE:2382",
+                "TPE:2395",
+                "TPE:0050",
+                "TPE:TAIEX"]
     gfc=GFClass()
-    sdatetime=datetime.datetime(1985, 1, 1, 0, 0, 0)
-    array=[]
+    #sdatetime=datetime.datetime(1985, 1, 1, 0, 0, 0)
     #gfc.getHistoryData(olist=array, isymbol=symbolstr, isdt=sdatetime)
     #gfc.list2csv(filename, array)
-    gfc.csv2list(symbolstr.replace(":","")+".csv", array)
-    gfc.getLatest2List(isymbol=symbolstr, ilist=array)
-    gfc.list2csv(filename, array)
-    for icount in range(len(array)):
-        print(array[icount])
+    for symbolstr in symbollist:
+        array=[]
+        filename=symbol2Filename(symbolstr)
+        print(filename+" processing...")
+        sys.stdout.flush()
+        gfc.csv2list(symbolstr.replace(":","")+".csv", array)
+        lastlen=len(array)
+        gfc.getLatest2List(isymbol=symbolstr, ilist=array)
+        newlen=len(array)
+        gfc.list2csv(filename, array)
+        print("New add {0:d} data".format(newlen-lastlen))
+        #for icount in range(len(array)):
+        #    print(array[icount])
     

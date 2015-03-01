@@ -20,7 +20,7 @@ class DrawQuote(QtGui.QWidget):
         Returns:
         Raises:
         """
-        self.posW=10
+        self.posW=8
         self.stickW=6
         self.stickOffsetX=50
         self.stickOffsetY=50
@@ -44,7 +44,11 @@ class DrawQuote(QtGui.QWidget):
         self.setCoordinate(QtCore.QEvent.Resize)      #set coordinate
         self.ui.pushButtonLoad.clicked.connect(self.loadBtnClicked)
         self.ui.pushButtonClearLog.clicked.connect(self.clearBtnClicked)
-        self.ui.pushButton_3.clicked.connect(self.Btn2Clicked)
+        self.ui.pushButtonLeft.clicked.connect(self.leftBtnClicked)
+        self.ui.pushButtonRight.clicked.connect(self.rightBtnClicked)
+        self.ui.pushButtonZoomIn.clicked.connect(self.zoomInBtnClicked)
+        self.ui.pushButtonZoomOut.clicked.connect(self.zoomOutBtnClicked)
+        self.ui.horizontalScrollBar.valueChanged.connect(self.scrollBarChanged)
         self.ui.show()
     def eventFilter(self, source, event):
         """event filter function
@@ -91,26 +95,30 @@ class DrawQuote(QtGui.QWidget):
                     for icount in range(len(self.aLine)):
                         self.ui.graphicsView.scene().removeItem(self.aLine[icount])
                     self.aLine=[]
-                #strtemp=""
+                strtemp=""
                 for icount in range(len(self.data.drawDataArray)):
                     itemp=self.data.drawDataArray[icount].drawDataStart(dataPos-1)
+                    if itemp==None:
+                        return QtGui.QWidget.eventFilter(self, source, event)
                     self.aLine.append(QtGui.QGraphicsTextItem("{0:.2f}".format(itemp)))
                     self.aLine[len(self.aLine)-1].setPos(self.num2X(0)+self.posW/2,self.value2Y(itemp)-10)
                     self.aLine[len(self.aLine)-1].setDefaultTextColor(self.data.drawDataArray[icount].color)
                     self.ui.graphicsView.scene().addItem(self.aLine[len(self.aLine)-1])
                     self.aLine.append(self.drawAssistLine(snum, itemp))
-                    #strtemp=strtemp+"{0:s}: {1:.2f};    ".format(self.data.drawDataArray[icount].caption, itemp)
-                #self.toLog(strtemp)
+                    strtemp=strtemp+"{0:s}: {1:.2f};    ".format(self.data.drawDataArray[icount].caption, itemp)
+                self.toLog(strtemp)
         elif (event.type() == QtCore.QEvent.Paint):
             if self.resizeFlag==True:
                 self.resizeFlag=False
-                self.clearScene()
-                self.setCoordinate(QtCore.QEvent.Resize)
-                self.calValueBoundary()
-                self.drawAllData()
+                self.repaint()
         elif (event.type() == QtCore.QEvent.Resize):
             self.resizeFlag=True
         return QtGui.QWidget.eventFilter(self, source, event)
+    def repaint (self):
+        self.clearScene()
+        self.setCoordinate(QtCore.QEvent.Resize)
+        self.calValueBoundary()
+        self.drawAllData()
     def clearScene (self):
         self.ui.graphicsView.scene().clear()
         self.positionLine=None
@@ -182,6 +190,26 @@ class DrawQuote(QtGui.QWidget):
             #self.boundaryrect=self.ui.graphicsView.scene().addRect(self.viewX(self.vwidth),self.viewY(self.vheight),self.vwidth,self.vheight)
         except Exception as e:
             self.toLog(traceback.format_exc())
+    def leftBtnClicked (self):
+        self.startData=self.startData+1
+        self.repaint()
+    def rightBtnClicked (self):
+        if self.startData>0:
+            self.startData=self.startData-1
+            self.repaint()
+    def zoomInBtnClicked (self):
+        if self.stickW>1:
+            self.stickW=self.stickW-1
+            self.posW=self.stickW+2
+            self.repaint()
+    def zoomOutBtnClicked(self):
+        self.stickW=self.stickW+1
+        self.posW=self.stickW+2
+        self.repaint()
+    def scrollBarChanged (self, ivalue):
+        if ivalue>0:
+            self.startData=ivalue
+            self.repaint()
     def clearBtnClicked (self):
         """clear log button click handler
 
@@ -208,11 +236,11 @@ class DrawQuote(QtGui.QWidget):
         self.setCoordinate(QtCore.QEvent.Resize)
         self.clearBtnClicked()
         self.data.loadFromCSV(fileName)
-        self.data.addToDrawArray(self.data.calMA(5, icolor=QtCore.Qt.red))
-        self.data.addToDrawArray(self.data.calMA(10, icolor=QtCore.Qt.green))
-        self.data.addToDrawArray(self.data.calMA(30, icolor=QtCore.Qt.blue))
+        self.assistData()
         self.calValueBoundary()
         self.drawAllData()
+        self.toLog("Data length {0:d}".format(len(self.data.sourceData)))
+
     def calValueBoundary (self):
         """calculate value boundary
 
@@ -224,12 +252,17 @@ class DrawQuote(QtGui.QWidget):
             #raise Exception("sss")
             self.drawNum=int(self.vwidth/self.posW)-1
             #self.toLog("w number:{0:d}".format(self.drawNum))
-            bound=self.data.getValueBoundaryForLastN(self.drawNum)
+            bound=self.data.getValueBoundaryForLastN(self.drawNum, self.startData)
             if bound==None:
                 return
             self.valueMax=bound[DataAnalysis.boundaryMax]*1.01
             self.valueMin=bound[DataAnalysis.boundaryMin]*0.99
             #self.toLog("bound:{0:f};{1:f}".format(bound[DataAnalysis.boundaryMax], bound[DataAnalysis.boundaryMin]))
+            self.ui.horizontalScrollBar.setMaximum(len(self.data.sourceData)-self.drawNum+10)
+            self.ui.horizontalScrollBar.setPageStep(int(self.drawNum/10))
+            self.ui.horizontalScrollBar.setInvertedAppearance(True)
+            self.ui.horizontalScrollBar.setInvertedControls(False)
+            self.ui.horizontalScrollBar.setInvertedControls(True)
         except Exception as e:
             self.toLog(traceback.format_exc())
     def drawAllData (self):
@@ -244,20 +277,6 @@ class DrawQuote(QtGui.QWidget):
             self.drawData()
         except Exception as e:
             self.toLog(traceback.format_exc())
-    def Btn2Clicked (self):
-        """button left
-
-        Args:
-        Returns:
-        Raises:
-        """
-        self.toLog("zeroY:{0:f};valueMax:{1:f};valueMin:{2:f};vheight:{3:f};vwidth:{4:f};stickOffsetY:{5:f};".format(
-                             self.zeroY,
-                             self.valueMax,
-                             self.valueMin,
-                             self.vheight,
-                             self.vwidth,
-                             self.stickOffsetY))
     def num2X (self, inum):
         """transform position number to view coodinate x
 
@@ -338,11 +357,13 @@ class DrawQuote(QtGui.QWidget):
                         break
                     if jcount!=0:
                         if iline!=0:
+                            pentemp=QtGui.QPen(self.data.drawDataArray[icount].color)
+                            pentemp.setWidth(self.data.drawDataArray[icount].penW)
                             self.ui.graphicsView.scene().addLine(self.num2X(ipos),
                                                                  self.value2Y(iline),
                                                                  self.num2X(ipos-1),
                                                                  self.value2Y(lastLine),
-                                                                 pen=QtGui.QPen(self.data.drawDataArray[icount].color))
+                                                                 pen=pentemp)
                             #self.toLog("po{0:d};{1:f};{2:f}".format(ipos,iline,lastLine))
                     lastLine=iline
     def drawAssistLine (self, ipos, ivalue):
@@ -353,6 +374,69 @@ class DrawQuote(QtGui.QWidget):
                                                     pen=QtGui.QPen(QtCore.Qt.lightGray))
     def final (self):
         pass
+    def assistData (self):
+        try:
+            ####
+            #self.data.addToDrawArray(self.data.calMA(60, color=QtCore.Qt.red))
+            #self.data.addToDrawArray(self.data.calWMA(60, color=QtCore.Qt.green))
+            #self.data.addToDrawArray(self.data.calEMA(60, color=QtCore.Qt.blue))
+            #self.data.addToDrawArray(self.data.calHMA(60, color=QtCore.Qt.magenta))
+            ####option 1
+            #bantemp=self.data.calEmaBand(int(90*DataAnalysis.fibo), mul=DataAnalysis.fibo*12,
+            #                             midcolor=QtCore.Qt.darkGreen, outcolor=QtCore.Qt.darkMagenta,
+            #                             midpenWidth=0, outpenWidth=3)
+            #self.data.addToDrawArray(bantemp[0])
+            #self.data.addToDrawArray(bantemp[1])
+            #self.data.addToDrawArray(bantemp[2])
+            #bantemp=self.data.calEmaBand(int(30*DataAnalysis.fibo), mul=DataAnalysis.fibo*4,
+            #                             midcolor=QtCore.Qt.lightGray, outcolor=QtCore.Qt.magenta)
+            #self.data.addToDrawArray(bantemp[0])
+            #self.data.addToDrawArray(bantemp[1])
+            #self.data.addToDrawArray(bantemp[2])
+            #matemp=self.data.calKKMA(280,40,
+            #                         color=QtCore.Qt.red,
+            #                         penWidth=2)
+            #self.data.addToDrawArray(matemp[0])
+            #self.data.addToDrawArray(matemp[1])
+            #matemp=self.data.calKKMA(112,16,
+            #                         color=QtCore.Qt.green,
+            #                         penWidth=2)
+            #self.data.addToDrawArray(matemp[0])
+            #self.data.addToDrawArray(matemp[1])
+            #matemp=self.data.calKKMA(28,4,
+            #                         color=QtCore.Qt.blue,
+            #                         penWidth=2)
+            #self.data.addToDrawArray(matemp[0])
+            #self.data.addToDrawArray(matemp[1])
+            ####
+            bantemp=self.data.calEmaBand(int(90*DataAnalysis.fibo), mul=DataAnalysis.fibo*12,
+                                         midcolor=QtCore.Qt.darkGreen, outcolor=QtCore.Qt.darkMagenta,
+                                         midpenWidth=0, outpenWidth=3)
+            self.data.addToDrawArray(bantemp[0])
+            self.data.addToDrawArray(bantemp[1])
+            self.data.addToDrawArray(bantemp[2])
+            bantemp=self.data.calEmaBand(int(30*DataAnalysis.fibo), mul=DataAnalysis.fibo*4,
+                                         midcolor=QtCore.Qt.lightGray, outcolor=QtCore.Qt.magenta)
+            self.data.addToDrawArray(bantemp[0])
+            self.data.addToDrawArray(bantemp[1])
+            self.data.addToDrawArray(bantemp[2])
+            #matemp=self.data.calKKMA(280,40,
+            #                         color=QtCore.Qt.red,
+            #                         penWidth=2)
+            #self.data.addToDrawArray(matemp[0])
+            #self.data.addToDrawArray(matemp[1])
+            matemp=self.data.calKKMA(112,16,
+                                     color=QtCore.Qt.green,
+                                     penWidth=2)
+            self.data.addToDrawArray(matemp[0])
+            self.data.addToDrawArray(matemp[1])
+            #matemp=self.data.calKKMA(28,4,
+            #                         color=QtCore.Qt.blue,
+            #                         penWidth=2)
+            #self.data.addToDrawArray(matemp[0])
+            #self.data.addToDrawArray(matemp[1])
+        except Exception as e:
+            self.toLog(traceback.format_exc())
 
 if __name__ == "__main__":
     try:
