@@ -7,15 +7,30 @@ from PyQt4 import QtCore
 
 from googleFinance import *
 class DrawData:
+    """draw data object
+    """
     dtypeLine=0
     def __init__ (self):
+        """constructor
+
+        Args:
+        Returns:
+        Raises:
+        """
         self.clear()
     def clear (self):
+        """constructor
+
+        Args:
+        Returns:
+        Raises:
+        """
         self.caption=""
         self.data=[]
         self.color=QtCore.Qt.black
         self.drawType=DrawData.dtypeLine
         self.penW=0
+        self.enable=True
     def drawDataStart (self, istart):
         self.startPos=istart
         postemp=(len(self.data)-istart-1)
@@ -23,9 +38,11 @@ class DrawData:
             return None
         return self.data[postemp]
 class DataAnalysis():
-    """calss to analysis data
+    """calss for analysis finance data
     """
+    #fibonacci ratio constant
     fibo=1.6180339
+    ###boundaryMax and boundaryMin are getValueBoundary return data index constant
     boundaryMax=0
     boundaryMin=1
     def __init__ (self):
@@ -39,12 +56,16 @@ class DataAnalysis():
         self.sourceData=[]
         self.drawDataArray=[]
         self.startPos=0
+        self.vmax=10000.0
+        self.vmin=0.0
     def clear (self):
         del self.sourceData
         self.sourceData=[]
         del self.drawDataArray
         self.drawDataArray=[]
         self.startPos=0
+        self.vmax=10000.0
+        self.vmin=0.0
     def loadFromCSV (self, ifname):
         """load data from csv file
 
@@ -56,6 +77,13 @@ class DataAnalysis():
         self.sourceData=[]  #clear data
         self.gfc.csv2list(ifname, self.sourceData)
         self.drawDataArray=[]
+        vtemp=self.getValueBoundary()
+        if vtemp==None:
+            self.clear()
+            raise Exception("Get value boundary fail...")
+        self.vmax=vtemp[DataAnalysis.boundaryMax]
+        self.vmin=vtemp[DataAnalysis.boundaryMin]
+
         #self.drawDataArray.append(self.calMA(5))
         #for icount in range(len(self.drawDataArray[0].data)):
         #    print(self.drawDataArray[0].data[icount])
@@ -93,6 +121,7 @@ class DataAnalysis():
         else:
             rangeNum=inum
         result=[0.0, 0.0]
+        #print("start:{0:d} num:{1:d}".format(startNum, rangeNum))
         for icount in range(rangeNum):
             rtemp=self.getValueBoundaryAtPos(len(self.sourceData)-icount-1-startNum)
             if icount==0:
@@ -105,6 +134,12 @@ class DataAnalysis():
                     result[DataAnalysis.boundaryMax]=rtemp[DataAnalysis.boundaryMax]
                 if result[DataAnalysis.boundaryMin]>rtemp[DataAnalysis.boundaryMin]:
                     result[DataAnalysis.boundaryMin]=rtemp[DataAnalysis.boundaryMin]
+            #print("{0:f} : {1:f} : {2:f} : {3:f}".format(rtemp[DataAnalysis.boundaryMax],
+            #                                                    rtemp[DataAnalysis.boundaryMin],
+            #                                                    result[DataAnalysis.boundaryMax],
+            #                                                    result[DataAnalysis.boundaryMin]))
+        #print("end")
+        #sys.stdout.flush()
         return result
         #result=[0.0,0.0]
         #if len(self.sourceData)==0:
@@ -132,6 +167,16 @@ class DataAnalysis():
         #            if result[1]>dtemp[jcount]:
         #                result[1]=dtemp[jcount]
         #return result
+    def getValueBoundary (self):
+        """get highest and lowest value in all data
+
+        Args:
+        Returns:
+        Raises:
+        """
+        if len(self.sourceData)==0:
+            return None
+        return self.getValueBoundaryForLastN(len(self.sourceData))
     def souceDataStart (self, istart):
         """get data
 

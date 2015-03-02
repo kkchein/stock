@@ -1,5 +1,7 @@
 """pyqt4 qevent string dict
 
+Application can use this dict to show event string.
+
 Constant	    Value	Description
 Qt.white	    3	White (#ffffff)
 Qt.black	    2	Black (#000000)

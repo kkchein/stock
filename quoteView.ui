@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1013</width>
-    <height>599</height>
+    <width>522</width>
+    <height>454</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
+  <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
@@ -23,7 +23,7 @@
       <attribute name="title">
        <string>Tab 1</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout_2">
+      <layout class="QGridLayout" name="gridLayout">
        <item row="0" column="0">
         <widget class="QPushButton" name="pushButtonClearLog">
          <property name="text">
@@ -31,27 +31,17 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="0" colspan="6">
-        <widget class="QGraphicsView" name="graphicsView">
-         <property name="mouseTracking">
-          <bool>true</bool>
-         </property>
-         <property name="toolTip">
-          <string/>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="5">
-        <widget class="QPushButton" name="pushButtonZoomOut">
-         <property name="text">
-          <string>ZoomOut</string>
-         </property>
-        </widget>
-       </item>
        <item row="0" column="1">
         <widget class="QPushButton" name="pushButtonLoad">
          <property name="text">
           <string>Load</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QPushButton" name="pushButtonLeft">
+         <property name="text">
+          <string>Left</string>
          </property>
         </widget>
        </item>
@@ -69,14 +59,50 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="2">
-        <widget class="QPushButton" name="pushButtonLeft">
+       <item row="0" column="5" colspan="2">
+        <widget class="QPushButton" name="pushButtonZoomOut">
          <property name="text">
-          <string>Left</string>
+          <string>ZoomOut</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="0" colspan="6">
+       <item row="1" column="0" colspan="6">
+        <widget class="QGraphicsView" name="graphicsView">
+         <property name="mouseTracking">
+          <bool>true</bool>
+         </property>
+         <property name="contextMenuPolicy">
+          <enum>Qt::NoContextMenu</enum>
+         </property>
+         <property name="toolTip">
+          <string/>
+         </property>
+         <property name="dragMode">
+          <enum>QGraphicsView::ScrollHandDrag</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="6">
+        <widget class="QGraphicsView" name="graphicsView_2">
+         <property name="maximumSize">
+          <size>
+           <width>50</width>
+           <height>16777215</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0" colspan="6">
+        <widget class="QGraphicsView" name="graphicsView_3">
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>20</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0" colspan="7">
         <widget class="QTextBrowser" name="textBrowser">
          <property name="maximumSize">
           <size>
@@ -84,21 +110,10 @@
            <height>50</height>
           </size>
          </property>
-        </widget>
-       </item>
-       <item row="2" column="0" colspan="6">
-        <widget class="QScrollBar" name="horizontalScrollBar">
-         <property name="maximum">
-          <number>10</number>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="invertedAppearance">
-          <bool>true</bool>
-         </property>
-         <property name="invertedControls">
-          <bool>true</bool>
+         <property name="font">
+          <font>
+           <family>Terminal</family>
+          </font>
          </property>
         </widget>
        </item>

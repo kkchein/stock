@@ -1,0 +1,10 @@
+#   X00_03  2015/03/02  K.K.Chien
+#       1. change to view-scene control to draw quote
+#       2. remove python which are get from internet
+#       3. add NIKKEI in symbollist table
+#       4. remove unquote py2exe 
+#   X00_02  2015/02/04  K.K.Chien
+#       1. complete drawquote
+#   X00_01  2015/02/03  K.K.Chien
+#       1. unquote.py to unquote http string
+#       2. googleFinance.py get stock data from google finance

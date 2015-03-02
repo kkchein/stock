@@ -10,20 +10,15 @@
             <F N="dataAnalysis.py"/>
             <F N="drawQuote.py"/>
             <F N="googleFinance.py"/>
-            <F N="practice.py"/>
-            <F N="pyqtDrawLine.py"/>
             <F N="PyqtQevent.py"/>
             <F N="setup.py"/>
-            <F N="stock.py"/>
-            <F N="stock2.py"/>
-            <F N="stock3.py"/>
             <F N="unquote.py"/>
+            <F N="dist_unquote/tcl/tix8.4.3/pref/WmDefault.py"/>
         </Folder>
         <Folder
             Name="Other Files"
             Filters="">
-            <F N="buildEXE.bat"/>
-            <F N="gf_content.txt"/>
+            <F N="release.txt"/>
         </Folder>
     </Files>
     <Config

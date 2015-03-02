@@ -196,7 +196,8 @@ if __name__ == "__main__":
                 "TPE:2382",
                 "TPE:2395",
                 "TPE:0050",
-                "TPE:TAIEX"]
+                "TPE:TAIEX",
+                "INDEXNIKKEI:NI225"]
     gfc=GFClass()
     #sdatetime=datetime.datetime(1985, 1, 1, 0, 0, 0)
     #gfc.getHistoryData(olist=array, isymbol=symbolstr, isdt=sdatetime)
