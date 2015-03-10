@@ -101,10 +101,13 @@ class DataAnalysis():
                     result[DataAnalysis.boundaryMin]=self.sourceData[ipos][icount]
         if len(self.drawDataArray)>0:
             for icount in range(len(self.drawDataArray)):
+                #print("data: ", self.drawDataArray[icount].data[ipos])
                 if result[DataAnalysis.boundaryMax]<self.drawDataArray[icount].data[ipos]:
                     result[DataAnalysis.boundaryMax]=self.drawDataArray[icount].data[ipos]
                 if result[DataAnalysis.boundaryMin]>self.drawDataArray[icount].data[ipos] and self.drawDataArray[icount].data[ipos]!=0:
                     result[DataAnalysis.boundaryMin]=self.drawDataArray[icount].data[ipos]
+                #print("max: ",result[DataAnalysis.boundaryMax])
+                #print("min: ",result[DataAnalysis.boundaryMin])
         return result
     def getValueBoundaryForLastN (self, inum, startNum=0):
         """get highest and lowest value in number data
@@ -176,7 +179,10 @@ class DataAnalysis():
         """
         if len(self.sourceData)==0:
             return None
-        return self.getValueBoundaryForLastN(len(self.sourceData))
+        vtemp=self.getValueBoundaryForLastN(len(self.sourceData))
+        self.vmax=vtemp[DataAnalysis.boundaryMax]
+        self.vmin=vtemp[DataAnalysis.boundaryMin]
+        return vtemp
     def souceDataStart (self, istart):
         """get data
 
@@ -194,6 +200,7 @@ class DataAnalysis():
     def addToDrawArray (self, idrawdata):
         if type(idrawdata) is DrawData:
             self.drawDataArray.append(idrawdata)
+        self.getValueBoundary()
     def sourcedata2Drawdata (self, pos):
         if pos<GFClass.gfStart or pos>GFClass.gfVol:
             return None
@@ -420,4 +427,16 @@ class DataAnalysis():
             loBand.data.append(midBand.data[icount]-offset*mul)
         return [hiBand, midBand, loBand]
 
+if __name__ == "__main__":
+    data=DataAnalysis()
+    data.loadFromCSV("test.csv")
+    bantemp=data.calEmaBand(int(90*DataAnalysis.fibo), mul=DataAnalysis.fibo*12,
+                            midcolor=QtCore.Qt.darkGreen, outcolor=QtCore.Qt.darkMagenta,
+                            midpenWidth=0, outpenWidth=3)
+    #data.addToDrawArray(bantemp[0])
+    #data.addToDrawArray(bantemp[1])
+    data.addToDrawArray(bantemp[2])
+    result=data.getValueBoundary()
+    print("1: {0:f} 2: {1:f}".format(result[0], result[1]))
+    print("max: {0:f} min: {1:f}".format(data.vmax, data.vmin))
 

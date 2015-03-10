@@ -24,67 +24,95 @@ class DrawQuote(QtGui.QWidget):
         QtGui.QWidget.__init__(self)
         self.data=DataAnalysis()    #create data analysis object
         ###
+        self.lastPos=0
+        ###
         self.posW=10
         self.stickW=8
         ###scene rect
         self.sceneRect=QtCore.QRectF()
         self.sceneRect.setBottomRight(QtCore.QPointF(0,self.value2Scene(self.data.vmin)))
         self.sceneRect.setTopLeft(QtCore.QPointF(-100,self.value2Scene(self.data.vmax)))
-        ###
         self.viewRect=QtCore.QRectF()
         self.viewRect.setBottomRight(QtCore.QPointF(0,self.value2Scene(self.data.vmin)))
         self.viewRect.setTopLeft(QtCore.QPointF(-100,self.value2Scene(self.data.vmax)))
         ###
+        self.valueSceneRect=QtCore.QRectF()
+        self.valueSceneRect.setBottomRight(QtCore.QPointF(0,self.value2Scene(self.data.vmin)))
+        self.valueSceneRect.setTopLeft(QtCore.QPointF(-50,self.value2Scene(self.data.vmax)))
+        self.valueViewRect=QtCore.QRectF()
+        self.valueViewRect.setBottomRight(QtCore.QPointF(0,self.value2Scene(self.data.vmin)))
+        self.valueViewRect.setTopLeft(QtCore.QPointF(-50,self.value2Scene(self.data.vmax)))
+        ###
         self.scaleXOffset=0
-
-
+        ###
         self.resizeFlag=False   #resize event flag
-        ####
+        ###
+        self.tempLine=[]
+        ###load pyqt ui
         self.ui=uic.loadUi("quoteView.ui", self) #load ui
+        ###setup main graphicsview
         self.ui.graphicsView.setScene(QtGui.QGraphicsScene(self)) #set scene
         self.ui.graphicsView.viewport().installEventFilter(self.ui)    #install event filter
+        #self.ui.graphicsView.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
         #self.ui.graphicsView.scene().addRect(-100,-20000,100,20000, brush=QtGui.QBrush(QtGui.QColor(255,0,0)))
         #self.ui.graphicsView.scene().addRect(-200,-40000,20,200, brush=QtGui.QBrush(QtGui.QColor(0,255,0)))
         #self.ui.graphicsView.scene().addRect(-300,-60000,20,200, brush=QtGui.QBrush(QtGui.QColor(0,0,255)))
         #self.ui.graphicsView.scene().addRect(-400,-80000,20,200, brush=QtGui.QBrush(QtGui.QColor(255,255,0)))
         #self.ui.graphicsView.scene().addRect(-500,-100000,20,200, brush=QtGui.QBrush(QtGui.QColor(0,255,255)))
         #pentemp=QtGui.QPen(QtCore.Qt.red,
-        #                   3,
+        #                   0,
         #                   QtCore.Qt.SolidLine,
         #                   QtCore.Qt.RoundCap,
         #                   QtCore.Qt.RoundJoin)
         #self.ui.graphicsView.scene().addLine(-100,
-        #                                     -30000,
+        #                                     -600000,
         #                                     -200,
-        #                                     -31000,
-        #                                     pettemp)
+        #                                     -600000,
+        #                                     pentemp)
+        #temp=QtGui.QGraphicsTextItem()
+        #ftemp=QtGui.QFont()
+        #ftemp.setPixelSize(10)
+        #temp.setPlainText("123456.00")
+        #temp.setTextWidth(100)
+        #temp.setPos(-300,-600000)
+        #temp.setFont(ftemp)
+        #temp.setDefaultTextColor(QtCore.Qt.black)
+        #self.ui.graphicsView.scene().addItem(temp)
         ###
-        self.setViewScene()
+        #self.getViewRect()
+        #self.setViewScene()
         ###setup event
         self.ui.pushButtonLoad.clicked.connect(self.loadBtnClicked)
         self.ui.pushButtonClearLog.clicked.connect(self.clearBtnClicked)
-        self.ui.pushButtonLeft.clicked.connect(self.leftBtnClicked)
-        self.ui.pushButtonRight.clicked.connect(self.rightBtnClicked)
+        self.ui.pushButtonFit.clicked.connect(self.fitBtnClicked)
         self.ui.pushButtonZoomIn.clicked.connect(self.zoomInBtnClicked)
         self.ui.pushButtonZoomOut.clicked.connect(self.zoomOutBtnClicked)
+        self.ui.checkBoxCrossLine.stateChanged.connect(self.checkBoxCrossLineChanged)
+        self.ui.checkBoxDrag.stateChanged.connect(self.checkBoxDragChanged)
         ###
         self.ui.show()
-    def leftBtnClicked (self):
+    def checkBoxDragChanged (self):
+        if self.ui.checkBoxDrag.isChecked()==True:
+            self.ui.graphicsView.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
+            self.toLog("drag")
+        else:
+            self.ui.graphicsView.setDragMode(QtGui.QGraphicsView.NoDrag)
+            self.toLog("Nodrag")
+    def checkBoxCrossLineChanged (self):
+        if self.ui.checkBoxCrossLine.isChecked()==False:
+            if len(self.tempLine)!=0:
+                for icount in range(len(self.tempLine)):
+                    self.ui.graphicsView.scene().removeItem(self.tempLine[icount])
+                self.tempLine=[]
+    def fitBtnClicked (self):
         """button left click handler
 
         Args:
         Returns:
         Raises:
         """
-        pass
-    def rightBtnClicked (self):
-        """button right click handler
-
-        Args:
-        Returns:
-        Raises:
-        """
-        pass
+        self.getViewRect()
+        self.setViewScene()
     def zoomInBtnClicked (self):
         """button zoom in click handler
 
@@ -96,6 +124,7 @@ class DrawQuote(QtGui.QWidget):
             self.scaleXOffset=0
         self.scaleXOffset=self.scaleXOffset-1
         self.setViewScene()
+        #self.scaleXOffset=0
     def zoomOutBtnClicked(self):
         """button zoom out click handler
 
@@ -107,11 +136,6 @@ class DrawQuote(QtGui.QWidget):
             self.scaleXOffset=0
         self.scaleXOffset=self.scaleXOffset+1
         self.setViewScene()
-        #recttemp=self.ui.graphicsView.mapToScene(self.ui.graphicsView.viewport().rect()).boundingRect()
-        #self.toLog("viewRect:L:{0:d} R;{1:d} T:{2:d} B:{3:d}".format(int(recttemp.left()),
-        #                                                             int(recttemp.right()),
-        #                                                             int(recttemp.top()),
-        #                                                             int(recttemp.bottom())))
     def clearBtnClicked (self):
         """button clear log click handler
 
@@ -132,15 +156,18 @@ class DrawQuote(QtGui.QWidget):
         if os.path.exists(fileName)==False:
             self.toLog(fileName+" doesn't exist")
             return
+        if self.ui.checkBoxCrossLine.isChecked()==True:
+            self.ui.checkBoxCrossLine.setCheckState(QtCore.Qt.Unchecked)
+            self.checkBoxDragChanged()
         self.data.clear()
         #load data from csv
         self.data.loadFromCSV(fileName)
         self.clearBtnClicked()
         self.clearScene()
-        self.setViewScene()
         self.drawCandleStick()
         self.assistData()
         self.drawAssistData()
+        self.setViewScene()
         self.toLog("Data length {0:d}".format(len(self.data.sourceData)))
     def eventFilter(self, source, event):
         """event filter function
@@ -155,24 +182,86 @@ class DrawQuote(QtGui.QWidget):
         if (event.type() == QtCore.QEvent.MouseButtonPress):
             pos = QtCore.QPointF(self.ui.graphicsView.mapToScene(event.pos()))
             if event.button() == QtCore.Qt.LeftButton:
-                self.toLog("Left Button Press (%d, %d)"% (pos.x(), pos.y()))
+                #pass
+                self.toLog("LBP Scene (%d, %d)"% (pos.x(), pos.y()))
+                self.toLog("LBP View (%d, %d)"% (event.pos().x(), event.pos().y()))
             elif event.button() == QtCore.Qt.RightButton:
-                self.toLog("right Button Press (%d, %d)"% (pos.x(), pos.y()))
-            pos = QtCore.QPointF(self.ui.graphicsView.mapToScene(event.pos()))
+                #self.toLog("right Button Press (%d, %d)"% (pos.x(), pos.y()))
+                self.toLog("sl:{0:f} sr:{1:f} st:{2:f} sb:{3:f}".format(self.sceneRect.left(),
+                                                                        self.sceneRect.right(),
+                                                                        self.sceneRect.top(),
+                                                                        self.sceneRect.bottom()))
+                self.toLog("vmax:{0:f} vmin:{1:f}".format(self.data.vmax, self.data.vmin))
+                #self.toLog(type())
+                #for icount in range(len(self.data.drawDataArray[0].data)):
+                #    print(self.data.drawDataArray[0].data[icount])
+
+
+            #pos = QtCore.QPointF(self.ui.graphicsView.mapToScene(event.pos()))
             #self.toLog('mouse press at: (%d, %d, %d, %d)' % (pos.x(), pos.y(), event.pos().x(), event.pos().y()))
         elif (event.type() == QtCore.QEvent.Paint):
             if self.resizeFlag==True:
                 self.resizeFlag=False
+                self.getViewRect()
                 self.setViewScene()
                 self.repaint()
         elif (event.type() == QtCore.QEvent.Resize):
             self.resizeFlag=True
         elif (event.type() == QtCore.QEvent.MouseMove):
             pos = QtCore.QPointF(self.ui.graphicsView.mapToScene(event.pos()))
-            #self.toLog("movse move (%f, %f)"% (self.scene2pos(pos.x()), self.scene2Value(pos.y())))
+            #self.toLog("movse move (%f, %f)"% (self.pos2Scene(self.scene2pos(pos.x())), self.scene2Value(pos.y())))
+            self.ui.labelCurrent.setText("Pos:{0:d} Value:{1:.2f}".format(self.scene2pos(pos.x()), self.scene2Value(pos.y())))
+            if self.ui.checkBoxCrossLine.isChecked()==True:
+                postemp=self.scene2pos(pos.x())
+                if postemp!=self.lastPos:
+                    self.lastPos=postemp
+                    if postemp>0:
+                        iarray=self.data.souceDataStart(postemp-1)
+                        idate=iarray[GFClass.gfDate]
+                        istart=iarray[GFClass.gfStart]
+                        ihigh=iarray[GFClass.gfHigh]
+                        ilow=iarray[GFClass.gfLow]
+                        iend=iarray[GFClass.gfEnd]
+                        self.ui.labelValue.setText("{0:s} End:{1:.2f}  start:{2:.2f} High:{3:.2f} Low:{4:.2f}".format(datetime.datetime.strftime(idate, self.data.gfc.dataStrType),
+                                                                                                                      iend,
+                                                                                                                      istart,
+                                                                                                                      ihigh,
+                                                                                                                      ilow))
+                    else:
+                        self.ui.labelValue.setText("")
+                if len(self.tempLine)!=0:
+                    for icount in range(len(self.tempLine)):
+                        self.ui.graphicsView.scene().removeItem(self.tempLine[icount])
+                    self.tempLine=[]
+                self.tempLine.append(self.ui.graphicsView.scene().addLine(self.pos2Scene(postemp),
+                                                                          self.sceneRect.bottom(),
+                                                                          self.pos2Scene(postemp),
+                                                                          self.sceneRect.top()))
+
+                self.tempLine.append(self.ui.graphicsView.scene().addLine(self.sceneRect.right(),
+                                                                          pos.y(),
+                                                                          self.sceneRect.left(),
+                                                                          pos.y()))
+                #self.tempLine.append(QtGui.QGraphicsTextItem("{0:.2f}".format(self.scene2Value(pos.y()))))
+                #self.tempLine[len(self.tempLine)-1].setPos(self.pos2Scene(self.scene2pos(pos.x())), pos.y())
+                #self.ui.graphicsView.scene().addItem(self.tempLine[len(self.tempLine)-1])
+                
+        elif (event.type() == QtCore.QEvent.MouseButtonRelease):
+            pos = QtCore.QPointF(self.ui.graphicsView.mapToScene(event.pos()))
+            if event.button() == QtCore.Qt.LeftButton:
+                #self.toLog("Left Button Relase (%d, %d)"% (pos.x(), pos.y()))
+                pass
+            elif event.button() == QtCore.Qt.RightButton:
+                #self.toLog("right Button Release (%d, %d)"% (pos.x(), pos.y()))
+                pass
+        elif (event.type() == QtCore.QEvent.WindowDeactivate):
+            if self.ui.checkBoxCrossLine.isChecked()==True:
+                self.ui.checkBoxCrossLine.setCheckState(QtCore.Qt.Unchecked)
+                self.checkBoxDragChanged()
         else:
             pass
             #self.toLog(PyqtQevent.eventStr[event.type()])
+            #print(PyqtQevent.eventStr[event.type()])
         return QtGui.QWidget.eventFilter(self, source, event)
     def x2Scene (self, ix):
         """convert x to graphicsSecne coordinate
@@ -205,7 +294,7 @@ class DrawQuote(QtGui.QWidget):
         Returns:
         Raises:
         """
-        ftemp=((0.0-ivalue)-self.posW/2)/self.posW
+        ftemp=((0.0-ivalue)-self.posW)/self.posW
         if ftemp<0:
             ftemp=0
         return math.ceil(ftemp)
@@ -259,6 +348,7 @@ class DrawQuote(QtGui.QWidget):
         Raises:
         """
         self.ui.graphicsView.scene().clear()
+        self.scaleXOffset=0
     def toLog (self, istr):
         """write string to log window
 
@@ -268,6 +358,10 @@ class DrawQuote(QtGui.QWidget):
         Raises:
         """
         self.ui.textBrowser.append(istr)
+    def getViewRect (self):
+        lttemp=self.ui.graphicsView.mapToScene(self.ui.graphicsView.viewport().rect().topLeft())
+        rbtemp=self.ui.graphicsView.mapToScene(self.ui.graphicsView.viewport().rect().bottomRight())
+        self.realViewRect=QtCore.QRectF(lttemp.x(),lttemp.y(), rbtemp.x()-lttemp.x(), rbtemp.y()-lttemp.y())
     def setViewScene (self):
         """set viewport and scene
 
@@ -276,20 +370,21 @@ class DrawQuote(QtGui.QWidget):
         Raises:
         """
         try:
-            lttemp=self.ui.graphicsView.mapToScene(self.ui.graphicsView.viewport().rect().topLeft())
-            rbtemp=self.ui.graphicsView.mapToScene(self.ui.graphicsView.viewport().rect().bottomRight())
-            recttemp=QtCore.QRectF(lttemp.x(),lttemp.y(), rbtemp.x()-lttemp.x(), rbtemp.y()-lttemp.y())
-            #recttemp=self.ui.graphicsView.mapToScene(self.ui.graphicsView.viewport().rect()).boundingRect()
-            #self.toLog("viewRect0:L:{0:d} R;{1:d} T:{2:d} B:{3:d}".format(int(recttemp.left()),
-            #                                                              int(recttemp.right()),
-            #                                                              int(recttemp.top()),
-            #                                                              int(recttemp.bottom())))
+            #self.toLog("t:{0:f} b:{1:f} l:{2:f} r:{3:f}".format(self.realViewRect.top(),
+            #                                                    self.realViewRect.bottom(),
+            #                                                    self.realViewRect.left(),
+            #                                                    self.realViewRect.right()))
+            #self.realViewRect=self.ui.graphicsView.mapToScene(self.ui.graphicsView.viewport().rect()).boundingRect()
+            #self.toLog("viewRect0:L:{0:d} R;{1:d} T:{2:d} B:{3:d}".format(int(self.realViewRect.left()),
+            #                                                              int(self.realViewRect.right()),
+            #                                                              int(self.realViewRect.top()),
+            #                                                              int(self.realViewRect.bottom())))
             datawidth=(len(self.data.sourceData)+1)*self.posW
             #set scene
-            if datawidth>recttemp.width():
+            if datawidth>self.realViewRect.width():
                 wtemp=datawidth
             else:
-                wtemp=recttemp.width()
+                wtemp=self.realViewRect.width()
             self.sceneRect.setLeft(0-wtemp)
             self.sceneRect.setRight(0)
             self.sceneRect.setTop(self.value2Scene(self.data.vmax))
@@ -303,8 +398,8 @@ class DrawQuote(QtGui.QWidget):
             #brtemp=self.ui.graphicsView.mapToScene(self.ui.graphicsView.viewport().geometry()).boundingRect().bottomRight()
             #tltemp=self.ui.graphicsView.mapToScene(self.ui.graphicsView.viewport().rect().topLeft())
             #brtemp=self.ui.graphicsView.mapToScene(self.ui.graphicsView.viewport().rect().bottomRight())
-            posl=self.scene2pos(recttemp.left())
-            posr=self.scene2pos(recttemp.right())
+            posl=self.scene2pos(self.realViewRect.left())
+            posr=self.scene2pos(self.realViewRect.right())
             btemp=self.data.getValueBoundaryForLastN(posl-posr+1, posr)
             #self.toLog("pos: {0:d} {1:d}".format(posl, posr))
             if btemp==None:
@@ -316,16 +411,16 @@ class DrawQuote(QtGui.QWidget):
                 #self.toLog("bvalue: {0:f} {1:f}".format(btemp[DataAnalysis.boundaryMax], btemp[DataAnalysis.boundaryMin]))
             self.viewRect.setTop(maxtemp)
             self.viewRect.setBottom(mintemp)
-            if (self.scaleXOffset*self.posW+recttemp.left()+2)<0:
-                self.viewRect.setLeft((self.scaleXOffset*self.posW+recttemp.left()+2))
+            if (self.scaleXOffset*self.posW+self.realViewRect.left()+2)<0:
+                self.viewRect.setLeft((self.scaleXOffset*self.posW+self.realViewRect.left()+2))
             else:
-                self.viewRect.setLeft(recttemp.left()+2)
-            self.viewRect.setRight(recttemp.right()-1)
+                self.viewRect.setLeft(self.realViewRect.left())
+            self.viewRect.setRight(int(self.realViewRect.right()))
             self.ui.graphicsView.fitInView(self.viewRect)
-            #self.toLog("viewRect1:L:{0:d} R;{1:d} T:{2:d} B:{3:d}".format(int(recttemp.left()),
-            #                                                              int(recttemp.right()),
-            #                                                              int(recttemp.top()),
-            #                                                              int(recttemp.bottom())))
+            #self.toLog("viewRect1:L:{0:d} R;{1:d} T:{2:d} B:{3:d}".format(int(self.realViewRect.left()),
+            #                                                              int(self.realViewRect.right()),
+            #                                                              int(self.realViewRect.top()),
+            #                                                              int(self.realViewRect.bottom())))
             #self.toLog("view: {0:f} {1:f}".format(maxtemp, mintemp))
             ###save back real viewrect data
             #tltemp=self.ui.graphicsView.mapToScene(self.ui.graphicsView.rect().topLeft())
@@ -338,11 +433,11 @@ class DrawQuote(QtGui.QWidget):
             #                                                         int(self.viewRect.right()),
             #                                                         int(self.viewRect.top()),
             #                                                         int(self.viewRect.bottom())))
-            #recttemp=self.ui.graphicsView.mapToScene(self.ui.graphicsView.viewport().geometry()).boundingRect()
-            #self.viewRect.setTop(recttemp.top())
-            #self.viewRect.setBottom(recttemp.bottom())
-            #self.viewRect.setLeft(recttemp.left())
-            #self.viewRect.setRight(recttemp.right())
+            #self.realViewRect=self.ui.graphicsView.mapToScene(self.ui.graphicsView.viewport().geometry()).boundingRect()
+            #self.viewRect.setTop(self.realViewRect.top())
+            #self.viewRect.setBottom(self.realViewRect.bottom())
+            #self.viewRect.setLeft(self.realViewRect.left())
+            #self.viewRect.setRight(self.realViewRect.right())
             #self.ui.graphicsView.fitInView(self.viewRect)
             #self.toLog("ivr1:L-{0:d} R-{1:d} T-{2:d} B-{3:d}".format(int(self.viewRect.left()),
             #                                                         int(self.viewRect.right()),
@@ -420,6 +515,7 @@ class DrawQuote(QtGui.QWidget):
                                                QtCore.Qt.SolidLine,
                                                QtCore.Qt.RoundCap,
                                                QtCore.Qt.RoundJoin)
+                            pentemp.setCosmetic(True)
                             if jcount!=0:
                                 self.ui.graphicsView.scene().addLine(self.pos2Scene(ipos),
                                                                      self.value2Scene(iline),
@@ -476,12 +572,13 @@ class DrawQuote(QtGui.QWidget):
             ####
             bantemp=self.data.calEmaBand(int(90*DataAnalysis.fibo), mul=DataAnalysis.fibo*12,
                                          midcolor=QtCore.Qt.darkGreen, outcolor=QtCore.Qt.darkMagenta,
-                                         midpenWidth=0, outpenWidth=0)
+                                         midpenWidth=0, outpenWidth=3)
             self.data.addToDrawArray(bantemp[0])
             self.data.addToDrawArray(bantemp[1])
             self.data.addToDrawArray(bantemp[2])
             bantemp=self.data.calEmaBand(int(30*DataAnalysis.fibo), mul=DataAnalysis.fibo*4,
-                                         midcolor=QtCore.Qt.lightGray, outcolor=QtCore.Qt.magenta)
+                                         midcolor=QtCore.Qt.lightGray, outcolor=QtCore.Qt.magenta,
+                                         midpenWidth=0, outpenWidth=3)
             self.data.addToDrawArray(bantemp[0])
             self.data.addToDrawArray(bantemp[1])
             self.data.addToDrawArray(bantemp[2])
@@ -501,6 +598,8 @@ class DrawQuote(QtGui.QWidget):
                                      penWidth=0)
             self.data.addToDrawArray(matemp[0])
             self.data.addToDrawArray(matemp[1])
+            ###
+            
         except Exception as e:
             self.toLog(traceback.format_exc())
 

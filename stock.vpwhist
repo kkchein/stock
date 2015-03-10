@@ -1,7 +1,7 @@
 [Global]
 CurrentProject=stock.vpj
 [ProjectDates]
-stock.vpj=20150302025609327
+stock.vpj=20150302050724357
 [ActiveConfig]
 stock.vpj=Debug
 [TreeExpansion2]
@@ -10,50 +10,42 @@ stock.vpj=Debug
   - Other Files
 scroll:0
 [State]
-SCREEN: 1366 768 -1680 324 1364 726 0 0 M 0 0 0 0 1415 706 0
+SCREEN: 1366 768 -84381 78760 1364 726 0 0 M 0 0 0 0 1101 316 0
 CWD: ..\stock
 BUFFER: BN="dataAnalysis.py"
 BI: MA=1 74 1  TABS=1 5  WWS=1 IWT=0 ST=0 IN=2 BW=0 US=32000 RO=0 SE=1 SN=0 BIN=0 MN=Python	HM=0 MF=0 TL=0 MLL=0 ASE=0 LNL=1 LCF=6 CAPS=0 E=0 ESBU2=8 CL="" SC="" SCE= SCU=
-VIEW: LN=.14373 CL=21 LE=0 CX=21 CY=10 WI=5 BI=23 HT=0 HN=0 HF=0 HC=4
+VIEW: LN=.16312 CL=34 LE=0 CX=34 CY=14 WI=5 BI=23 HT=0 HN=0 HF=0 HC=4
 BUFFER: BN="googleFinance.py"
-BI: MA=1 74 1  TABS=1 5  WWS=1 IWT=0 ST=0 IN=2 BW=0 US=32000 RO=0 SE=1 SN=0 BIN=0 MN=Python	HM=0 MF=608 TL=0 MLL=0 ASE=0 LNL=1 LCF=6 CAPS=0 E=0 ESBU2=8 CL="" SC="" SCE= SCU=
-VIEW: LN=.276 CL=14 LE=0 CX=14 CY=14 WI=5 BI=26 HT=0 HN=0 HF=0 HC=4
+BI: MA=1 74 1  TABS=1 5  WWS=1 IWT=0 ST=0 IN=2 BW=0 US=32000 RO=0 SE=1 SN=0 BIN=0 MN=Python	HM=0 MF=0 TL=0 MLL=0 ASE=0 LNL=1 LCF=6 CAPS=0 E=0 ESBU2=8 CL="" SC="" SCE= SCU=
+VIEW: LN=.174 CL=40 LE=0 CX=40 CY=11 WI=5 BI=24 HT=0 HN=0 HF=0 HC=4
+BUFFER: BN="yahooFinance.py"
+BI: MA=1 74 1  TABS=1 5  WWS=1 IWT=0 ST=0 IN=2 BW=0 US=32000 RO=0 SE=1 SN=0 BIN=0 MN=Python	HM=0 MF=0 TL=0 MLL=0 ASE=0 LNL=1 LCF=6 CAPS=0 E=0 ESBU2=8 CL="" SC="" SCE= SCU=
+VIEW: LN=.1600 CL=13 LE=0 CX=13 CY=10 WI=5 BI=25 HT=0 HN=0 HF=0 HC=4
 BUFFER: BN="drawQuote.py"
-BI: MA=1 74 1  TABS=1 5  WWS=1 IWT=0 ST=0 IN=2 BW=0 US=32000 RO=0 SE=1 SN=0 BIN=0 MN=Python	HM=0 MF=608 TL=0 MLL=0 ASE=0 LNL=1 LCF=6 CAPS=0 E=0 ESBU2=8 CL="" SC="" SCE= SCU=
-VIEW: LN=.20730 CL=17 LE=0 CX=17 CY=18 WI=5 BI=24 HT=0 HN=0 HF=0 HC=4
-WINDOW: 60 75 853 268 -1 -1 N  WF=0 WT=4 ",,,"
+BI: MA=1 74 1  TABS=1 5  WWS=1 IWT=0 ST=0 IN=2 BW=0 US=32000 RO=0 SE=1 SN=0 BIN=0 MN=Python	HM=0 MF=864 TL=0 MLL=0 ASE=0 LNL=1 LCF=6 CAPS=0 E=0 ESBU2=8 CL="" SC="" SCE= SCU=
+VIEW: LN=.5026 CL=28 LE=0 CX=28 CY=9 WI=5 BI=26 HT=0 HN=0 HF=0 HC=4
+WINDOW: 300 150 1096 494 -1 -1 N  WF=0 WT=4 ",,,"
 BUFFER: BN="dataAnalysis.py"
-VIEW: LN=.14373 CL=21 LE=0 CX=25 CY=10 WI=189 BI=23 HT=0 HN=0 HF=0 HC=4
-WINDOW: 0 0 1096 494 -1 -1 N  WF=0 WT=2 ",,,"
+VIEW: LN=.16312 CL=34 LE=0 CX=38 CY=14 WI=191 BI=23 HT=0 HN=0 HF=0 HC=4
+WINDOW: 20 25 1096 494 -1 -1 N  WF=0 WT=5 ",,,"
 BUFFER: BN="googleFinance.py"
-VIEW: LN=.276 CL=14 LE=0 CX=17 CY=14 WI=11 BI=26 HT=0 HN=0 HF=0 HC=4
-WINDOW: 80 100 1096 443 -1 -1 M  WF=0 WT=1 ",,,"
+VIEW: LN=.174 CL=40 LE=0 CX=43 CY=11 WI=193 BI=24 HT=0 HN=0 HF=0 HC=4
+WINDOW: 40 50 1096 494 -1 -1 N  WF=0 WT=6 ",,,"
+BUFFER: BN="yahooFinance.py"
+VIEW: LN=.1600 CL=13 LE=0 CX=16 CY=10 WI=195 BI=25 HT=0 HN=0 HF=0 HC=4
+WINDOW: 240 75 1096 494 -1 -1 M  WF=0 WT=1 ",,,"
 BUFFER: BN="drawQuote.py"
-VIEW: LN=.20429 CL=18 LE=0 CX=22 CY=12 WI=191 BI=24 HT=0 HN=0 HF=0 HC=4
+VIEW: LN=.5013 CL=12 LE=0 CX=15 CY=14 WI=197 BI=26 HT=0 HN=0 HF=0 HC=4
 FILEHIST: 9
-stock2.py
-pyqtDrawLine.py
-stock3.py
-PyqtQevent.py
-practice.py
-dataAnalysis.py
-unquote.py
-drawQuote.py
-googleFinance.py
-DEBUG2: 0
-PROJECT_CACHE: 1
-20150130021800756 13 D:\kkchein_dir\Project\Python\stock\code\stock\stock.vpj
-dataAnalysis.py
-drawQuote.py
-googleFinance.py
-practice.py
-pyqtDrawLine.py
-PyqtQevent.py
-setup.py
-stock.py
-stock2.py
-stock3.py
-unquote.py
-buildEXE.bat
 gf_content.txt
+dist_unquote\tcl\tix8.4.3\pref\WmDefault.txt
+release.txt
+PyqtQevent.py
+C:\Python34\lib\urllib\request.py
+googleFinance.py
+yahooFinance.py
+dataAnalysis.py
+drawQuote.py
+DEBUG2: 0
+PROJECT_CACHE: 0
 TBCLASS: 0 0

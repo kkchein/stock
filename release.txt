@@ -1,3 +1,8 @@
+#   X00_04  2015/03/10  K.K.Chien
+#       1. add yahooFinance to get quote data from yahoo finance
+#       2. getValueBoundary wil update vmax, vmin
+#       3. draw assisntant line
+#       4. encode utf8 in googlefinance
 #   X00_03  2015/03/02  K.K.Chien
 #       1. change to view-scene control to draw quote
 #       2. remove python which are get from internet

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>522</width>
+    <width>610</width>
     <height>454</height>
    </rect>
   </property>
@@ -24,49 +24,70 @@
        <string>Tab 1</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout">
-       <item row="0" column="0">
+       <item row="0" column="0" rowspan="2">
         <widget class="QPushButton" name="pushButtonClearLog">
          <property name="text">
           <string>Clear Log</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
+       <item row="0" column="1" rowspan="2">
         <widget class="QPushButton" name="pushButtonLoad">
          <property name="text">
           <string>Load</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="2">
-        <widget class="QPushButton" name="pushButtonLeft">
+       <item row="0" column="2" rowspan="2">
+        <widget class="QPushButton" name="pushButtonFit">
          <property name="text">
-          <string>Left</string>
+          <string>Fit</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="3">
-        <widget class="QPushButton" name="pushButtonRight">
-         <property name="text">
-          <string>Right</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="4">
+       <item row="0" column="3" rowspan="2">
         <widget class="QPushButton" name="pushButtonZoomIn">
          <property name="text">
           <string>ZoomIn</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="5" colspan="2">
+       <item row="0" column="4" rowspan="2">
         <widget class="QPushButton" name="pushButtonZoomOut">
          <property name="text">
           <string>ZoomOut</string>
          </property>
         </widget>
        </item>
-       <item row="1" column="0" colspan="6">
+       <item row="0" column="5">
+        <widget class="QCheckBox" name="checkBoxDrag">
+         <property name="text">
+          <string>Enable Drag</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="5">
+        <widget class="QCheckBox" name="checkBoxCrossLine">
+         <property name="text">
+          <string>EnableCrossLine</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0" colspan="6">
+        <widget class="QLabel" name="labelValue">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0" colspan="6">
+        <widget class="QLabel" name="labelCurrent">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0" colspan="6">
         <widget class="QGraphicsView" name="graphicsView">
          <property name="mouseTracking">
           <bool>true</bool>
@@ -78,31 +99,11 @@
           <string/>
          </property>
          <property name="dragMode">
-          <enum>QGraphicsView::ScrollHandDrag</enum>
+          <enum>QGraphicsView::NoDrag</enum>
          </property>
         </widget>
        </item>
-       <item row="1" column="6">
-        <widget class="QGraphicsView" name="graphicsView_2">
-         <property name="maximumSize">
-          <size>
-           <width>50</width>
-           <height>16777215</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0" colspan="6">
-        <widget class="QGraphicsView" name="graphicsView_3">
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>20</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0" colspan="7">
+       <item row="5" column="0" colspan="6">
         <widget class="QTextBrowser" name="textBrowser">
          <property name="maximumSize">
           <size>

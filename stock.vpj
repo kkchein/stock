@@ -14,6 +14,7 @@
             <F N="setup.py"/>
             <F N="unquote.py"/>
             <F N="dist_unquote/tcl/tix8.4.3/pref/WmDefault.py"/>
+            <F N="yahooFinance.py"/>
         </Folder>
         <Folder
             Name="Other Files"

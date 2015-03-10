@@ -3,21 +3,26 @@ r"""get data from google finance
 """
 import urllib.parse
 import urllib.request
-import re
 import datetime
-import csv
 import time
+import csv
 import sys
 
-#"https://www.google.com/finance/historical?q=TPE:TAIEX&startdate=1/1/1985&start=0&num=30"
+#"http://ichart.yahoo.com/table.csv?s=^TWII&a=2&b=2&c=2014"
+#"http://finance.yahoo.com/d/quotes.csv?s=^TWII&f=p0ohgc1"
+#p0 - last close value
+#o - today open
+#h - today high
+#g - today low
+#c1 - change
 
-class GFClass():
-    gfDate=0
-    gfStart=1
-    gfHigh=2
-    gfLow=3
-    gfEnd=4
-    gfVol=5
+class YFClass():
+    yfDate=0
+    yfStart=1
+    yfHigh=2
+    yfLow=3
+    yfEnd=4
+    yfVol=5
     def __init__ (self):
         """constructor
 
@@ -25,12 +30,10 @@ class GFClass():
         Returns:
         Raises:
         """
-        self.stockid="TPE:TAIEX"
+        self.stockid="^TWII"
         self.startDateTime=datetime.datetime(1976, 1, 1, 8, 0, 0)
-        self.displayNum=30
         self.outputFile="hitory.csv"
-        self.googleDateStrType="%b %d, %Y"
-        self.googleUrlDateStrType="%m/%d/%Y"
+        self.yahooDateStrType="%Y-%m-%d"
         self.dataStrType="%Y/%m/%d"
     def getHistoryData (self, olist, isymbol=None, isdt=None):
         """get history data from google finance
@@ -49,41 +52,25 @@ class GFClass():
         if isymbol!=None:
             self.stockid=isymbol
 
-        opener = urllib.request.build_opener()
-        opener.addheaders = [('User-agent', 'Chrome')]
-        urlstr="https://www.google.com/finance/historical?q={0:s}&startdate={1:s}&start=0&num={2:d}".format(
-            self.stockid, datetime.datetime.strftime(self.startDateTime, self.googleUrlDateStrType), self.displayNum)
-        content = opener.open(urlstr).read()
-        totalSizeStr=r'google\.finance\.applyPagination\(\s+\d+,\s+\d+,\s+(\d+),\s+'
-        reg_row_size =  re.compile( totalSizeStr )
-        match_r_sz = reg_row_size.search( content.decode("utf-8") )
-        if (match_r_sz is None):
-            print("There is no data.")
-            return False
-        row_size = int (match_r_sz.groups()[0])
-        print("ID: {0:s} StartDate: {1:s} DataSize:{2:d}".format(
-            self.stockid, datetime.datetime.strftime(self.startDateTime, self.dataStrType), row_size))
-        if row_size%self.displayNum!=0:
-            pageSize=int(row_size/self.displayNum)+1
-        else:
-            pageSize=int(row_size/self.displayNum)
-        #print("page "+ str(pageSize))
-        ##Open, high, low, close, volume
-        dataStr = r'<td class="lm">(.+)' +  \
-            '\s<td class="rgt">(.+)' + \
-            '\s<td class="rgt">(.+)' + \
-            '\s<td class="rgt">(.+)' + \
-            '\s<td class="rgt">(.+)' + \
-            '\s<td class="rgt rm">(.+)'
-        reg_price = re.compile( dataStr )
-        for icount in range(pageSize):
-            urlstr="https://www.google.com/finance/historical?q={0:s}&startdate={1:s}&start={2:d}&num={3:d}".format(
-                self.stockid, datetime.datetime.strftime(self.startDateTime, "%m/%d/%Y"), icount*self.displayNum, self.displayNum)
-            #print(urlstr)
-            content = opener.open(urlstr).read()
-            stock_data = reg_price.findall( content.decode("utf-8") )
-            self.urlData2List(stock_data, olist)
-        olist.sort()
+        dstr=datetime.datetime.strftime(self.startDateTime, self.yahooDateStrType)
+        urlstr="http://ichart.yahoo.com/table.csv?s={0:s}&a={1:d}&b={2:d}&c={3:d}".format(
+            self.stockid,
+            int(dstr[5:7]) - 1,
+            int(dstr[8:10]),
+            int(dstr[0:4]))
+        #print(urlstr)
+        try:
+            opener = urllib.request.build_opener()
+            opener.addheaders = [('User-agent', 'Chrome')]
+            content = opener.open(urlstr).read().decode("utf-8").split('\n')
+            self.urlData2List(content, olist)
+            olist.sort()
+            print("ID: {0:s} StartDate: {1:s} DataSize:{2:d}".format(
+                self.stockid, datetime.datetime.strftime(self.startDateTime, self.dataStrType), len(olist)))
+            #for item in olist:
+            #    print(item)
+        except urllib.error.HTTPError:
+            print("No data")
         return True
     def urlData2List (self, idata, odata):
         """convert google data to data
@@ -95,28 +82,33 @@ class GFClass():
         Raises:
         """
         for icount in range(len(idata)):
-            dt = datetime.datetime.fromtimestamp(time.mktime(time.strptime(idata[icount][0], self.googleDateStrType)))
+            ltemp=idata[icount].split(',')
             try:
-                openValue=float(idata[icount][1].replace(",",""))
+                dt = datetime.datetime.fromtimestamp(time.mktime(time.strptime(ltemp[0], self.yahooDateStrType)))
+            except ValueError:
+                continue
+            try:
+                openValue=float(ltemp[1].replace(",",""))
             except ValueError:
                 openValue=0.0
             try:
-                highValue=float(idata[icount][2].replace(",",""))
+                highValue=float(ltemp[2].replace(",",""))
             except ValueError:
                 highValue=0.0
             try:
-                lowValue=float(idata[icount][3].replace(",",""))
+                lowValue=float(ltemp[3].replace(",",""))
             except ValueError:
                 lowValue=0.0
             try:
-                closeValue=float(idata[icount][4].replace(",",""))
+                closeValue=float(ltemp[4].replace(",",""))
             except ValueError:
                 closeValue=0.0
             try:
-                volValue=float(idata[icount][5].replace(",",""))
+                volValue=float(ltemp[5].replace(",",""))
             except ValueError:
                 volValue=0.0
             odata.append([dt, openValue, highValue, lowValue, closeValue, volValue])
+
     def getLatest2List (self, ilist, isymbol):
         """according list from csv, get lastest data from google finance
 
@@ -190,30 +182,24 @@ class GFClass():
                              str(idata[icount][5])])
         csvFileW.close
 def symbol2Filename (isymbol):
-    return symbolstr.replace(":","")+".csv"
+    return symbolstr.replace("^","Index_")+".csv"
 if __name__ == "__main__":
-    symbollist=["TPE:2330",             #縩筿
-                "TPE:2382",             #約笷
-                "TPE:2395",             #地
-                "TPE:0050",             #芖50
-                "TPE:TAIEX",            #芖舦计
-                "INDEXNIKKEI:NI225",    #ら竒
-                "INDEXBOM:SENSEX"]      #﹕禦庇稰30计BSE SENSEX
-    gfc=GFClass()
-    #sdatetime=datetime.datetime(1985, 1, 1, 0, 0, 0)
-    #gfc.getHistoryData(olist=array, isymbol=symbolstr, isdt=sdatetime)
-    #gfc.list2csv(filename, array)
+    symbollist=["^STI",     #^STI - 穝℡甽厨计
+                "^JKSE"]    #^JKSE - ェ懂笷侯计 Jakarta Composite Index
+    yfc=YFClass()
+    array=[]
+    #yfc.getHistoryData(array)
+    #yfc.list2csv("temp.csv", array)
+    #yfc.csv2list("temp.csv", array)
     for symbolstr in symbollist:
         array=[]
         filename=symbol2Filename(symbolstr)
         print(filename+" processing...")
         sys.stdout.flush()
-        gfc.csv2list(filename, array)
+        yfc.csv2list(filename, array)
         lastlen=len(array)
-        gfc.getLatest2List(isymbol=symbolstr, ilist=array)
+        yfc.getLatest2List(isymbol=symbolstr, ilist=array)
         newlen=len(array)
-        gfc.list2csv(filename, array)
+        yfc.list2csv(filename, array)
         print("New add {0:d} data".format(newlen-lastlen))
-        #for icount in range(len(array)):
-        #    print(array[icount])
-    
+
