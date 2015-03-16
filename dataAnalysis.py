@@ -3,9 +3,11 @@
 import sys
 import collections
 import math
+import csv
+import datetime
+import time
 from PyQt4 import QtCore
 
-from googleFinance import *
 class DrawData:
     """draw data object
     """
@@ -32,6 +34,13 @@ class DrawData:
         self.penW=0
         self.enable=True
     def drawDataStart (self, istart):
+        """get drawdata at start position
+
+        Args:
+            istart - start position
+        Returns:
+        Raises:
+        """
         self.startPos=istart
         postemp=(len(self.data)-istart-1)
         if postemp>=len(self.data) or postemp<0:
@@ -45,6 +54,14 @@ class DataAnalysis():
     ###boundaryMax and boundaryMin are getValueBoundary return data index constant
     boundaryMax=0
     boundaryMin=1
+    ###
+    gfDate=0
+    gfStart=1
+    gfHigh=2
+    gfLow=3
+    gfEnd=4
+    gfVol=5
+    dataStrType="%Y/%m/%d"
     def __init__ (self):
         """constructor
 
@@ -52,13 +69,19 @@ class DataAnalysis():
         Returns:
         Raises:
         """
-        self.gfc=GFClass()
         self.sourceData=[]
         self.drawDataArray=[]
         self.startPos=0
         self.vmax=10000.0
         self.vmin=0.0
+        self.clearTemp()
     def clear (self):
+        """clear data
+
+        Args:
+        Returns:
+        Raises:
+        """
         del self.sourceData
         self.sourceData=[]
         del self.drawDataArray
@@ -66,6 +89,98 @@ class DataAnalysis():
         self.startPos=0
         self.vmax=10000.0
         self.vmin=0.0
+        ###
+        self.clearTemp()
+    def clearTemp (self):
+        self.starttemp=[]
+        self.endtemp=[]
+        self.hightemp=[]
+        self.lowtemp=[]
+    def csv2list (self, icsvfilename, odata):
+        """read csv data into memory
+
+        Args:
+            icsvfilename- csv file name
+            odata- output data
+        Returns:
+        Raises:
+        """
+        try:
+            csvFileR=open(icsvfilename, "r")
+        except FileNotFoundError:
+            return
+        csvContent=csv.reader(csvFileR, delimiter=',')
+        for i in csvContent:
+            dt = datetime.datetime.fromtimestamp(time.mktime(time.strptime(i[0], DataAnalysis.dataStrType)))
+            try:
+                openValue=float(i[1].replace(",",""))
+            except ValueError:
+                openValue=0.0
+            try:
+                highValue=float(i[2].replace(",",""))
+            except ValueError:
+                highValue=0.0
+            try:
+                lowValue=float(i[3].replace(",",""))
+            except ValueError:
+                lowValue=0.0
+            try:
+                closeValue=float(i[4].replace(",",""))
+            except ValueError:
+                closeValue=0.0
+            try:
+                volValue=float(i[5].replace(",",""))
+            except ValueError:
+                volValue=0.0
+            odata.append([dt, openValue, highValue, lowValue, closeValue, volValue])
+        odata.sort()
+        csvFileR.close()
+    def list2csv (self, ocsvfilename, idata):
+        """save list data to csv
+
+        Args:
+            ocsvfilename- csv file name
+            idata- input data
+        Returns:
+        Raises:
+        """
+        csvFileW=open(ocsvfilename, "w", newline='')
+        csvContent=csv.writer(csvFileW, delimiter=',')
+        for icount in range(len(idata)):
+            csvContent.writerow([datetime.datetime.strftime(idata[icount][0], DataAnalysis.dataStrType),
+                             str(idata[icount][1]),
+                             str(idata[icount][2]),
+                             str(idata[icount][3]),
+                             str(idata[icount][4]),
+                             str(idata[icount][5])])
+        csvFileW.close
+    def listReduce (self, idata, odata, period=2):
+        icount=0
+        pcount=0
+        while icount<len(idata):
+            if pcount==0:
+                dtemp=idata[icount][DataAnalysis.gfDate]
+                stemp=idata[icount][DataAnalysis.gfStart]
+                htemp=idata[icount][DataAnalysis.gfHigh]
+                ltemp=idata[icount][DataAnalysis.gfLow]
+                etemp=idata[icount][DataAnalysis.gfEnd]
+                vtemp=idata[icount][DataAnalysis.gfVol]
+            else:
+                if htemp<idata[icount][DataAnalysis.gfHigh]:
+                    htemp=idata[icount][DataAnalysis.gfHigh]
+                if ltemp>idata[icount][DataAnalysis.gfLow]:
+                    ltemp=idata[icount][DataAnalysis.gfLow]
+                etemp=idata[icount][DataAnalysis.gfEnd]
+                vtemp=vtemp+idata[icount][DataAnalysis.gfVol]
+            icount=icount+1
+            pcount=pcount+1
+            if pcount==period:
+                pcount=0
+                odata.append([dtemp, stemp, htemp, ltemp, etemp, vtemp])
+            else:
+                if icount==len(idata):
+                    odata.append([dtemp, stemp, htemp, ltemp, etemp, vtemp])
+            
     def loadFromCSV (self, ifname):
         """load data from csv file
 
@@ -75,7 +190,7 @@ class DataAnalysis():
         Raises:
         """
         self.sourceData=[]  #clear data
-        self.gfc.csv2list(ifname, self.sourceData)
+        self.csv2list(ifname, self.sourceData)
         self.drawDataArray=[]
         vtemp=self.getValueBoundary()
         if vtemp==None:
@@ -88,13 +203,20 @@ class DataAnalysis():
         #for icount in range(len(self.drawDataArray[0].data)):
         #    print(self.drawDataArray[0].data[icount])
     def getValueBoundaryAtPos (self, ipos):
+        """get max/min value at position
+
+        Args:
+            ipos - position
+        Returns:
+        Raises:
+        """
         result=[0.0,10000000000000000000.0]
         if "sourceData" in self.__dict__:
             if len(self.sourceData)==0:
                 return None
             if ipos>=len(self.sourceData):
                 return None
-            for icount in range(GFClass.gfStart, GFClass.gfEnd+1):
+            for icount in range(DataAnalysis.gfStart, DataAnalysis.gfEnd+1):
                 if result[DataAnalysis.boundaryMax]<self.sourceData[ipos][icount]:
                     result[DataAnalysis.boundaryMax]=self.sourceData[ipos][icount]
                 if result[DataAnalysis.boundaryMin]>self.sourceData[ipos][icount]:
@@ -198,46 +320,85 @@ class DataAnalysis():
         return self.sourceData[postemp]
 
     def addToDrawArray (self, idrawdata):
+        """add draw data into array
+
+        Args:
+            idrawdata- draw data
+        Returns:
+        Raises:
+        """
         if type(idrawdata) is DrawData:
             self.drawDataArray.append(idrawdata)
         self.getValueBoundary()
     def sourcedata2Drawdata (self, pos):
-        if pos<GFClass.gfStart or pos>GFClass.gfVol:
+        """convert source data to drawdata
+
+        Args:
+            pos - source data offset position
+        Returns:
+        Raises:
+        """
+        if pos<DataAnalysis.gfStart or pos>DataAnalysis.gfVol:
             return None
         result=DrawData()
         for icount in range(len(self.sourceData)):
             result.data.append(self.sourceData[icount][pos])
         return result
+    def calMAOnetick (self, period, odata, iData):
+        if type(odata)!=DrawData:
+            raise Exception("odata is not DrawData.")
+        self.endtemp.append(iData)
+        if len(self.endtemp)>=period:
+            vtemp=0.0
+            for icount in range(period):
+                vtemp=vtemp+self.endtemp[len(self.endtemp)-1-icount]
+            odata.data.append(vtemp/period)
+        else:
+            odata.data.append(0)
     def calMA (self, period, inputData=None, capStr="", color=QtCore.Qt.black, penWidth=0):
+        """calculate moving average
+
+        Args:
+            period - moving average period
+            inpuData - original data, None- use source data as input
+            capStr - caption string
+            color - drawing color
+            penWidth - drawing pen width
+        Returns:
+        Raises:
+        """
         if inputData==None:
             if len(self.sourceData)==0:
                 return None
-        elif type(inputData)!=DrawData:
-            return None
-        result=DrawData()
+            inputData=self.souceData
+        #elif type(inputData)!=DrawData:
+        #    return None
+        result=DrawData(DrawData.dtypeMa)
         result.penW=penWidth
         result.color=color
         if capStr=="":
             result.caption="MA{0:d}".format(period)
         else:
             result.caption=capStr
-        vtemp=collections.deque([]) #queue
-        if inputData==None:
-            loopLen=len(self.sourceData)
-        else:
-            loopLen=len(inputData.data)
-        for icount in range(loopLen):
-            if inputData==None:
-                vtemp.append(self.sourceData[icount][GFClass.gfEnd])
-            else:
-                vtemp.append(inputData.data[icount])
-            ftemp=0.0;
-            if icount>=period-1:
-                for jcount in range(period):
-                    ftemp=ftemp+vtemp[jcount]
-                ftemp=ftemp/period
-                vtemp.popleft()
-            result.data.append(ftemp)
+        for icount in range(len(inputData)):
+            data2.calMAOnetick(period, result, inputData[icount][DataAnalysis.gfEnd])
+        #vtemp=collections.deque([]) #queue
+        #if inputData==None:
+        #    loopLen=len(self.sourceData)
+        #else:
+        #    loopLen=len(inputData.data)
+        #for icount in range(loopLen):
+        #    if inputData==None:
+        #        vtemp.append(self.sourceData[icount][DataAnalysis.gfEnd])
+        #    else:
+        #        vtemp.append(inputData.data[icount])
+        #    ftemp=0.0;
+        #    if icount>=period-1:
+        #        for jcount in range(period):
+        #            ftemp=ftemp+vtemp[jcount]
+        #        ftemp=ftemp/period
+        #        vtemp.popleft()
+        #    result.data.append(ftemp)
         return result
     def calWMA (self, period, inputData=None, capStr="", color=QtCore.Qt.black, penWidth=0):
         if inputData==None:
@@ -260,7 +421,7 @@ class DataAnalysis():
         for icount in range(loopLen):
 
             if inputData==None:
-                xtemp=self.sourceData[icount][GFClass.gfEnd]
+                xtemp=self.sourceData[icount][DataAnalysis.gfEnd]
             else:
                 xtemp=inputData.data[icount]
             if xtemp!=0:
@@ -298,7 +459,7 @@ class DataAnalysis():
             loopLen=len(inputData.data)
         for icount in range(loopLen):
             if inputData==None:
-                ftemp=self.sourceData[icount][GFClass.gfEnd]
+                ftemp=self.sourceData[icount][DataAnalysis.gfEnd]
             else:
                 ftemp=inputData.data[icount]
             if icount==0:
@@ -315,7 +476,7 @@ class DataAnalysis():
         elif type(inputData)!=DrawData:
             return None
         if inputData==None:
-            srcTemp=self.sourcedata2Drawdata(GFClass.gfEnd)
+            srcTemp=self.sourcedata2Drawdata(DataAnalysis.gfEnd)
             if srcTemp==None:
                 return None
         else:
@@ -344,7 +505,7 @@ class DataAnalysis():
         elif type(inputData)!=DrawData:
             return None
         if inputData==None:
-            srctemp=self.sourcedata2Drawdata(GFClass.gfEnd)
+            srctemp=self.sourcedata2Drawdata(DataAnalysis.gfEnd)
         else:
             srctemp=inputData
         result0=self.calHMA(srcperiod, inputData=srctemp)
@@ -383,7 +544,7 @@ class DataAnalysis():
             midBand.caption=capStr+"_M"
         ####
         if inputData==None:
-            srchi=self.sourcedata2Drawdata(GFClass.gfHigh)
+            srchi=self.sourcedata2Drawdata(DataAnalysis.gfHigh)
             if srchi==None:
                 return None
             hitemp=self.calEMA(period, inputData=srchi)
@@ -393,7 +554,7 @@ class DataAnalysis():
             return None
         ####
         if inputData==None:
-            srclo=self.sourcedata2Drawdata(GFClass.gfLow)
+            srclo=self.sourcedata2Drawdata(DataAnalysis.gfLow)
             if srclo==None:
                 return None
             lotemp=self.calEMA(period, inputData=srclo)

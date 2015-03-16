@@ -7,6 +7,7 @@ import datetime
 import time
 import csv
 import sys
+from dataAnalysis import *
 
 #"http://ichart.yahoo.com/table.csv?s=^TWII&a=2&b=2&c=2014"
 #"http://finance.yahoo.com/d/quotes.csv?s=^TWII&f=p0ohgc1"
@@ -34,7 +35,6 @@ class YFClass():
         self.startDateTime=datetime.datetime(1976, 1, 1, 8, 0, 0)
         self.outputFile="hitory.csv"
         self.yahooDateStrType="%Y-%m-%d"
-        self.dataStrType="%Y/%m/%d"
     def getHistoryData (self, olist, isymbol=None, isdt=None):
         """get history data from google finance
 
@@ -66,7 +66,7 @@ class YFClass():
             self.urlData2List(content, olist)
             olist.sort()
             print("ID: {0:s} StartDate: {1:s} DataSize:{2:d}".format(
-                self.stockid, datetime.datetime.strftime(self.startDateTime, self.dataStrType), len(olist)))
+                self.stockid, datetime.datetime.strftime(self.startDateTime, DataAnalysis.dataStrType), len(olist)))
             #for item in olist:
             #    print(item)
         except urllib.error.HTTPError:
@@ -123,66 +123,8 @@ class YFClass():
         else:
             lastdt=datetime.datetime(1985, 1, 1, 0, 0, 0)
         self.getHistoryData(ilist, isymbol, lastdt)
-    def csv2list (self, icsvfilename, odata):
-        """read csv data into memory
-
-        Args:
-            icsvfilename- csv file name
-            odata- output data
-        Returns:
-        Raises:
-        """
-        try:
-            csvFileR=open(icsvfilename, "r")
-        except FileNotFoundError:
-            return
-        csvContent=csv.reader(csvFileR, delimiter=',')
-        for i in csvContent:
-            dt = datetime.datetime.fromtimestamp(time.mktime(time.strptime(i[0], self.dataStrType)))
-            try:
-                openValue=float(i[1].replace(",",""))
-            except ValueError:
-                openValue=0.0
-            try:
-                highValue=float(i[2].replace(",",""))
-            except ValueError:
-                highValue=0.0
-            try:
-                lowValue=float(i[3].replace(",",""))
-            except ValueError:
-                lowValue=0.0
-            try:
-                closeValue=float(i[4].replace(",",""))
-            except ValueError:
-                closeValue=0.0
-            try:
-                volValue=float(i[5].replace(",",""))
-            except ValueError:
-                volValue=0.0
-            odata.append([dt, openValue, highValue, lowValue, closeValue, volValue])
-        odata.sort()
-        csvFileR.close()
-    def list2csv (self, ocsvfilename, idata):
-        """save list data to csv
-
-        Args:
-            ocsvfilename- csv file name
-            idata- input data
-        Returns:
-        Raises:
-        """
-        csvFileW=open(ocsvfilename, "w", newline='')
-        csvContent=csv.writer(csvFileW, delimiter=',')
-        for icount in range(len(idata)):
-            csvContent.writerow([datetime.datetime.strftime(idata[icount][0], self.dataStrType),
-                             str(idata[icount][1]),
-                             str(idata[icount][2]),
-                             str(idata[icount][3]),
-                             str(idata[icount][4]),
-                             str(idata[icount][5])])
-        csvFileW.close
 def symbol2Filename (isymbol):
-    return symbolstr.replace("^","Index_")+".csv"
+    return symbolstr.replace("^","Index_")
 if __name__ == "__main__":
     symbollist=["^STI",     #^STI - 新加坡海峽時報指數
                 "^JKSE"]    #^JKSE - 印尼雅加達綜合指數 Jakarta Composite Index
@@ -191,15 +133,20 @@ if __name__ == "__main__":
     #yfc.getHistoryData(array)
     #yfc.list2csv("temp.csv", array)
     #yfc.csv2list("temp.csv", array)
+    da=DataAnalysis()
     for symbolstr in symbollist:
         array=[]
         filename=symbol2Filename(symbolstr)
         print(filename+" processing...")
         sys.stdout.flush()
-        yfc.csv2list(filename, array)
+        da.csv2list(filename+".csv", array)
         lastlen=len(array)
         yfc.getLatest2List(isymbol=symbolstr, ilist=array)
         newlen=len(array)
-        yfc.list2csv(filename, array)
+        da.list2csv(filename+".csv", array)
         print("New add {0:d} data".format(newlen-lastlen))
+        print(filename+"_2.csv processing...")
+        rarray=[]
+        da.listReduce(array, rarray)
+        da.list2csv(filename+"_2.csv", rarray)
 

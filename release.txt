@@ -1,3 +1,6 @@
+#   X00_05  2015/03/16  K.K.Chien
+#       1. add tickreduce function
+#       2. move csv2list  list2csv to DataAnalysis
 #   X00_04  2015/03/10  K.K.Chien
 #       1. add yahooFinance to get quote data from yahoo finance
 #       2. getValueBoundary wil update vmax, vmin

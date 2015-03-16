@@ -111,6 +111,7 @@ class DrawQuote(QtGui.QWidget):
         Returns:
         Raises:
         """
+        self.scaleXOffset=0
         self.getViewRect()
         self.setViewScene()
     def zoomInBtnClicked (self):
@@ -120,9 +121,10 @@ class DrawQuote(QtGui.QWidget):
         Returns:
         Raises:
         """
-        if self.scaleXOffset>0:
+        if self.scaleXOffset>1:
             self.scaleXOffset=0
-        self.scaleXOffset=self.scaleXOffset-1
+        self.scaleXOffset=self.scaleXOffset-2
+        self.getViewRect()
         self.setViewScene()
         #self.scaleXOffset=0
     def zoomOutBtnClicked(self):
@@ -132,9 +134,10 @@ class DrawQuote(QtGui.QWidget):
         Returns:
         Raises:
         """
-        if self.scaleXOffset<0:
+        if self.scaleXOffset<-1:
             self.scaleXOffset=0
-        self.scaleXOffset=self.scaleXOffset+1
+        self.scaleXOffset=self.scaleXOffset+2
+        self.getViewRect()
         self.setViewScene()
     def clearBtnClicked (self):
         """button clear log click handler
@@ -182,16 +185,17 @@ class DrawQuote(QtGui.QWidget):
         if (event.type() == QtCore.QEvent.MouseButtonPress):
             pos = QtCore.QPointF(self.ui.graphicsView.mapToScene(event.pos()))
             if event.button() == QtCore.Qt.LeftButton:
-                #pass
-                self.toLog("LBP Scene (%d, %d)"% (pos.x(), pos.y()))
-                self.toLog("LBP View (%d, %d)"% (event.pos().x(), event.pos().y()))
+                pass
+                #self.toLog("LBP Scene (%d, %d)"% (pos.x(), pos.y()))
+                #self.toLog("LBP View (%d, %d)"% (event.pos().x(), event.pos().y()))
             elif event.button() == QtCore.Qt.RightButton:
+                pass
                 #self.toLog("right Button Press (%d, %d)"% (pos.x(), pos.y()))
-                self.toLog("sl:{0:f} sr:{1:f} st:{2:f} sb:{3:f}".format(self.sceneRect.left(),
-                                                                        self.sceneRect.right(),
-                                                                        self.sceneRect.top(),
-                                                                        self.sceneRect.bottom()))
-                self.toLog("vmax:{0:f} vmin:{1:f}".format(self.data.vmax, self.data.vmin))
+                #self.toLog("sl:{0:f} sr:{1:f} st:{2:f} sb:{3:f}".format(self.sceneRect.left(),
+                #                                                        self.sceneRect.right(),
+                #                                                        self.sceneRect.top(),
+                #                                                        self.sceneRect.bottom()))
+                #self.toLog("vmax:{0:f} vmin:{1:f}".format(self.data.vmax, self.data.vmin))
                 #self.toLog(type())
                 #for icount in range(len(self.data.drawDataArray[0].data)):
                 #    print(self.data.drawDataArray[0].data[icount])
@@ -217,12 +221,12 @@ class DrawQuote(QtGui.QWidget):
                     self.lastPos=postemp
                     if postemp>0:
                         iarray=self.data.souceDataStart(postemp-1)
-                        idate=iarray[GFClass.gfDate]
-                        istart=iarray[GFClass.gfStart]
-                        ihigh=iarray[GFClass.gfHigh]
-                        ilow=iarray[GFClass.gfLow]
-                        iend=iarray[GFClass.gfEnd]
-                        self.ui.labelValue.setText("{0:s} End:{1:.2f}  start:{2:.2f} High:{3:.2f} Low:{4:.2f}".format(datetime.datetime.strftime(idate, self.data.gfc.dataStrType),
+                        idate=iarray[DataAnalysis.gfDate]
+                        istart=iarray[DataAnalysis.gfStart]
+                        ihigh=iarray[DataAnalysis.gfHigh]
+                        ilow=iarray[DataAnalysis.gfLow]
+                        iend=iarray[DataAnalysis.gfEnd]
+                        self.ui.labelValue.setText("{0:s} End:{1:.2f}  start:{2:.2f} High:{3:.2f} Low:{4:.2f}".format(datetime.datetime.strftime(idate, DataAnalysis.dataStrType),
                                                                                                                       iend,
                                                                                                                       istart,
                                                                                                                       ihigh,
@@ -459,10 +463,10 @@ class DrawQuote(QtGui.QWidget):
             for icount in range(len(self.data.sourceData)):
                 dataPos=icount
                 iarray=self.data.souceDataStart(dataPos)
-                istart=iarray[GFClass.gfStart]
-                ihigh=iarray[GFClass.gfHigh]
-                ilow=iarray[GFClass.gfLow]
-                iend=iarray[GFClass.gfEnd]
+                istart=iarray[DataAnalysis.gfStart]
+                ihigh=iarray[DataAnalysis.gfHigh]
+                ilow=iarray[DataAnalysis.gfLow]
+                iend=iarray[DataAnalysis.gfEnd]
                 ipos=icount+1
                 self.ui.graphicsView.scene().addLine(self.pos2Scene(ipos),
                                                      self.value2Scene(ihigh),
@@ -582,18 +586,21 @@ class DrawQuote(QtGui.QWidget):
             self.data.addToDrawArray(bantemp[0])
             self.data.addToDrawArray(bantemp[1])
             self.data.addToDrawArray(bantemp[2])
-            matemp=self.data.calKKMA(112,16,
+            matemp=self.data.calKKMA(int(70*DataAnalysis.fibo),
+                                     int(10*DataAnalysis.fibo),
                                      color=QtCore.Qt.green,
                                      penWidth=0)
             self.data.addToDrawArray(matemp[0])
             self.data.addToDrawArray(matemp[1])
             
-            matemp=self.data.calKKMA(280,40,
+            matemp=self.data.calKKMA(int(175*DataAnalysis.fibo),
+                                     int(25*DataAnalysis.fibo),
                                      color=QtCore.Qt.red,
                                      penWidth=0)
             self.data.addToDrawArray(matemp[0])
             self.data.addToDrawArray(matemp[1])
-            matemp=self.data.calKKMA(28,4,
+            matemp=self.data.calKKMA(int(18*DataAnalysis.fibo),
+                                     int(2*DataAnalysis.fibo),
                                      color=QtCore.Qt.blue,
                                      penWidth=0)
             self.data.addToDrawArray(matemp[0])

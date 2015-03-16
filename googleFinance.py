@@ -8,16 +8,18 @@ import datetime
 import csv
 import time
 import sys
+from dataAnalysis import *
+
 
 #"https://www.google.com/finance/historical?q=TPE:TAIEX&startdate=1/1/1985&start=0&num=30"
 
 class GFClass():
-    gfDate=0
-    gfStart=1
-    gfHigh=2
-    gfLow=3
-    gfEnd=4
-    gfVol=5
+    #gfDate=0
+    #gfStart=1
+    #gfHigh=2
+    #gfLow=3
+    #gfEnd=4
+    #gfVol=5
     def __init__ (self):
         """constructor
 
@@ -31,7 +33,6 @@ class GFClass():
         self.outputFile="hitory.csv"
         self.googleDateStrType="%b %d, %Y"
         self.googleUrlDateStrType="%m/%d/%Y"
-        self.dataStrType="%Y/%m/%d"
     def getHistoryData (self, olist, isymbol=None, isdt=None):
         """get history data from google finance
 
@@ -62,7 +63,7 @@ class GFClass():
             return False
         row_size = int (match_r_sz.groups()[0])
         print("ID: {0:s} StartDate: {1:s} DataSize:{2:d}".format(
-            self.stockid, datetime.datetime.strftime(self.startDateTime, self.dataStrType), row_size))
+            self.stockid, datetime.datetime.strftime(self.startDateTime, DataAnalysis.dataStrType), row_size))
         if row_size%self.displayNum!=0:
             pageSize=int(row_size/self.displayNum)+1
         else:
@@ -131,66 +132,8 @@ class GFClass():
         else:
             lastdt=datetime.datetime(1985, 1, 1, 0, 0, 0)
         self.getHistoryData(ilist, isymbol, lastdt)
-    def csv2list (self, icsvfilename, odata):
-        """read csv data into memory
-
-        Args:
-            icsvfilename- csv file name
-            odata- output data
-        Returns:
-        Raises:
-        """
-        try:
-            csvFileR=open(icsvfilename, "r")
-        except FileNotFoundError:
-            return
-        csvContent=csv.reader(csvFileR, delimiter=',')
-        for i in csvContent:
-            dt = datetime.datetime.fromtimestamp(time.mktime(time.strptime(i[0], self.dataStrType)))
-            try:
-                openValue=float(i[1].replace(",",""))
-            except ValueError:
-                openValue=0.0
-            try:
-                highValue=float(i[2].replace(",",""))
-            except ValueError:
-                highValue=0.0
-            try:
-                lowValue=float(i[3].replace(",",""))
-            except ValueError:
-                lowValue=0.0
-            try:
-                closeValue=float(i[4].replace(",",""))
-            except ValueError:
-                closeValue=0.0
-            try:
-                volValue=float(i[5].replace(",",""))
-            except ValueError:
-                volValue=0.0
-            odata.append([dt, openValue, highValue, lowValue, closeValue, volValue])
-        odata.sort()
-        csvFileR.close()
-    def list2csv (self, ocsvfilename, idata):
-        """save list data to csv
-
-        Args:
-            ocsvfilename- csv file name
-            idata- input data
-        Returns:
-        Raises:
-        """
-        csvFileW=open(ocsvfilename, "w", newline='')
-        csvContent=csv.writer(csvFileW, delimiter=',')
-        for icount in range(len(idata)):
-            csvContent.writerow([datetime.datetime.strftime(idata[icount][0], self.dataStrType),
-                             str(idata[icount][1]),
-                             str(idata[icount][2]),
-                             str(idata[icount][3]),
-                             str(idata[icount][4]),
-                             str(idata[icount][5])])
-        csvFileW.close
 def symbol2Filename (isymbol):
-    return symbolstr.replace(":","")+".csv"
+    return symbolstr.replace(":","")
 if __name__ == "__main__":
     symbollist=["TPE:2330",             #台積電
                 "TPE:2382",             #廣達
@@ -200,20 +143,23 @@ if __name__ == "__main__":
                 "INDEXNIKKEI:NI225",    #日經
                 "INDEXBOM:SENSEX"]      #孟買敏感30指數、BSE SENSEX
     gfc=GFClass()
-    #sdatetime=datetime.datetime(1985, 1, 1, 0, 0, 0)
-    #gfc.getHistoryData(olist=array, isymbol=symbolstr, isdt=sdatetime)
-    #gfc.list2csv(filename, array)
+    da=DataAnalysis()
     for symbolstr in symbollist:
         array=[]
         filename=symbol2Filename(symbolstr)
-        print(filename+" processing...")
+        print(filename+".csv processing...")
         sys.stdout.flush()
-        gfc.csv2list(filename, array)
+        da.csv2list(filename+".csv", array)
         lastlen=len(array)
         gfc.getLatest2List(isymbol=symbolstr, ilist=array)
         newlen=len(array)
-        gfc.list2csv(filename, array)
+        da.list2csv(filename+".csv", array)
         print("New add {0:d} data".format(newlen-lastlen))
         #for icount in range(len(array)):
         #    print(array[icount])
+        print(filename+"_2.csv processing...")
+        rarray=[]
+        da.listReduce(array, rarray)
+        da.list2csv(filename+"_2.csv", rarray)
+
     
