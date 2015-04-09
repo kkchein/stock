@@ -12,6 +12,7 @@ class DrawData:
     """draw data object
     """
     dtypeLine=0
+    dtypeDiff=1
     def __init__ (self):
         """constructor
 
@@ -46,6 +47,15 @@ class DrawData:
         if postemp>=len(self.data) or postemp<0:
             return None
         return self.data[postemp]
+    def __getitem__ (self, ind):
+        return self.data[ind]
+    def __str__ (self):
+        stemp=self.caption+"\n"
+        for icount in range(len(self.data)):
+            stemp=stemp+"Value: {0:.2f}\n".format(self.data[icount].caption, len(self.data[icount]))
+        return stemp
+    def __len__ (self):
+        return len(self.data)
 class DataAnalysis():
     """calss for analysis finance data
     """
@@ -75,6 +85,11 @@ class DataAnalysis():
         self.vmax=10000.0
         self.vmin=0.0
         self.clearTemp()
+    def __str__ (self):
+        stemp="Source data size: {0:d}\n".format(len(self.sourceData))
+        for icount in range(len(self.drawDataArray)):
+            stemp=stemp+"{0:s} - size {1:d}\n".format(self.drawDataArray[icount].caption, len(self.drawDataArray[icount]))
+        return stemp
     def clear (self):
         """clear data
 
@@ -216,20 +231,18 @@ class DataAnalysis():
                 return None
             if ipos>=len(self.sourceData):
                 return None
-            for icount in range(DataAnalysis.gfStart, DataAnalysis.gfEnd+1):
-                if result[DataAnalysis.boundaryMax]<self.sourceData[ipos][icount]:
-                    result[DataAnalysis.boundaryMax]=self.sourceData[ipos][icount]
-                if result[DataAnalysis.boundaryMin]>self.sourceData[ipos][icount]:
-                    result[DataAnalysis.boundaryMin]=self.sourceData[ipos][icount]
+            if result[DataAnalysis.boundaryMax]<self.sourceData[ipos][DataAnalysis.gfHigh]:
+                result[DataAnalysis.boundaryMax]=self.sourceData[ipos][DataAnalysis.gfHigh]
+            if result[DataAnalysis.boundaryMin]>self.sourceData[ipos][DataAnalysis.gfLow]:
+                result[DataAnalysis.boundaryMin]=self.sourceData[ipos][DataAnalysis.gfLow]
+        else:
+            return None
         if len(self.drawDataArray)>0:
             for icount in range(len(self.drawDataArray)):
-                #print("data: ", self.drawDataArray[icount].data[ipos])
                 if result[DataAnalysis.boundaryMax]<self.drawDataArray[icount].data[ipos]:
                     result[DataAnalysis.boundaryMax]=self.drawDataArray[icount].data[ipos]
                 if result[DataAnalysis.boundaryMin]>self.drawDataArray[icount].data[ipos] and self.drawDataArray[icount].data[ipos]!=0:
                     result[DataAnalysis.boundaryMin]=self.drawDataArray[icount].data[ipos]
-                #print("max: ",result[DataAnalysis.boundaryMax])
-                #print("min: ",result[DataAnalysis.boundaryMin])
         return result
     def getValueBoundaryForLastN (self, inum, startNum=0):
         """get highest and lowest value in number data
@@ -241,14 +254,14 @@ class DataAnalysis():
         """
         if len(self.sourceData)<=startNum:
             return None
-        if inum>len(self.sourceData)-startNum:
+        if inum+startNum>len(self.sourceData):
             rangeNum=len(self.sourceData)-startNum
         else:
             rangeNum=inum
         result=[0.0, 0.0]
         #print("start:{0:d} num:{1:d}".format(startNum, rangeNum))
-        for icount in range(rangeNum):
-            rtemp=self.getValueBoundaryAtPos(len(self.sourceData)-icount-1-startNum)
+        for icount in range(int(rangeNum)):
+            rtemp=self.getValueBoundaryAtPos(icount+int(startNum))
             if icount==0:
                 if rtemp==None:
                     return None
@@ -305,20 +318,6 @@ class DataAnalysis():
         self.vmax=vtemp[DataAnalysis.boundaryMax]
         self.vmin=vtemp[DataAnalysis.boundaryMin]
         return vtemp
-    def souceDataStart (self, istart):
-        """get data
-
-        Args:
-            istart- data start
-        Returns:
-        Raises:
-        """
-        self.startPos=istart
-        postemp=(len(self.sourceData)-istart-1)
-        if postemp>=len(self.sourceData) or postemp<0:
-            return None
-        return self.sourceData[postemp]
-
     def addToDrawArray (self, idrawdata):
         """add draw data into array
 
@@ -370,7 +369,7 @@ class DataAnalysis():
         if inputData==None:
             if len(self.sourceData)==0:
                 return None
-            inputData=self.souceData
+            inputData=self.sourceData
         #elif type(inputData)!=DrawData:
         #    return None
         result=DrawData(DrawData.dtypeMa)
@@ -594,10 +593,15 @@ if __name__ == "__main__":
     bantemp=data.calEmaBand(int(90*DataAnalysis.fibo), mul=DataAnalysis.fibo*12,
                             midcolor=QtCore.Qt.darkGreen, outcolor=QtCore.Qt.darkMagenta,
                             midpenWidth=0, outpenWidth=3)
-    #data.addToDrawArray(bantemp[0])
-    #data.addToDrawArray(bantemp[1])
+    #print(bantemp[0])
+    #print(bantemp[0][0])
+    #print(bantemp[0][1])
+    data.addToDrawArray(bantemp[0])
+    data.addToDrawArray(bantemp[1])
     data.addToDrawArray(bantemp[2])
-    result=data.getValueBoundary()
-    print("1: {0:f} 2: {1:f}".format(result[0], result[1]))
-    print("max: {0:f} min: {1:f}".format(data.vmax, data.vmin))
+    #result=data.getValueBoundary()
+    #result=data.getValueBoundaryForLastN(5)
+    #print("1: {0:f} 2: {1:f}".format(result[0], result[1]))
+    #print("max: {0:f} min: {1:f}".format(data.vmax, data.vmin))
+    #print(data)
 

@@ -14,4 +14,7 @@
 #      options = {'py2exe': py2exe_options},
 #      zipfile = None,
 #      )
+stemp="KKMA28340_2"
+stemp=stemp.split("_")[0]
+print(stemp)
 

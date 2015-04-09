@@ -139,6 +139,8 @@ if __name__ == "__main__":
                 "TPE:2382",             #廣達
                 "TPE:2395",             #研華
                 "TPE:0050",             #台灣50
+                "TPE:0061",             #寶滬深
+                "TPE:2002",             #中鋼
                 "TPE:TAIEX",            #台灣加權指數
                 "INDEXNIKKEI:NI225",    #日經
                 "INDEXBOM:SENSEX"]      #孟買敏感30指數、BSE SENSEX

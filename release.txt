@@ -1,3 +1,6 @@
+#   X00_06  2015/04/09  K.K.Chien
+#       1. add draw line function
+#       2. change scene space mapping method
 #   X00_05  2015/03/16  K.K.Chien
 #       1. add tickreduce function
 #       2. move csv2list  list2csv to DataAnalysis
