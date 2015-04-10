@@ -1,3 +1,6 @@
+#   X00_07  2015/04/10  K.K.Chien
+#       1. caculate kkma diff
+#       2. draw kkma diff top bottom dot
 #   X00_06  2015/04/09  K.K.Chien
 #       1. add draw line function
 #       2. change scene space mapping method

@@ -239,6 +239,8 @@ class DataAnalysis():
             return None
         if len(self.drawDataArray)>0:
             for icount in range(len(self.drawDataArray)):
+                if self.drawDataArray[icount].drawType==DrawData.dtypeDiff:
+                    continue
                 if result[DataAnalysis.boundaryMax]<self.drawDataArray[icount].data[ipos]:
                     result[DataAnalysis.boundaryMax]=self.drawDataArray[icount].data[ipos]
                 if result[DataAnalysis.boundaryMin]>self.drawDataArray[icount].data[ipos] and self.drawDataArray[icount].data[ipos]!=0:
@@ -521,7 +523,16 @@ class DataAnalysis():
             result1.caption="KKMA{0:d}{1:d}_2".format(srcperiod, maperiod)
         else:
             result1.caption=capStr+"_2"
-        return [result0, result1]
+        #calculate diff
+        result2=DrawData()
+        result2.drawType=DrawData.dtypeDiff
+        if capStr=="":
+            result2.caption="KKMA{0:d}{1:d}_Diff".format(srcperiod, maperiod)
+        else:
+            result2.caption=capStr+"_Diff"
+        for icount in range(len(result0.data)):
+            result2.data.append(result0.data[icount]-result1.data[icount])
+        return [result0, result1, result2]
     def calEmaBand (self, period, mul=1, inputData=None, capStr="",
                     midcolor=QtCore.Qt.black,  outcolor=QtCore.Qt.black,
                     midpenWidth=0, outpenWidth=0):

@@ -28,6 +28,7 @@ class DrawQuote(QtGui.QWidget):
         ###
         self.posW=10
         self.stickW=8
+        self.dotW=6
         ###scene rect
         self.sceneRect=QtCore.QRectF()
         self.sceneRect.setBottomRight(QtCore.QPointF(0,self.value2Scene(self.data.vmin)))
@@ -44,6 +45,7 @@ class DrawQuote(QtGui.QWidget):
         self.valueViewRect.setTopLeft(QtCore.QPointF(-50,self.value2Scene(self.data.vmax)))
         ###
         self.scaleXOffset=0
+        self.scaleYRation=1.0
         ###
         self.resizeFlag=False   #resize event flag
         ###
@@ -176,15 +178,15 @@ class DrawQuote(QtGui.QWidget):
             self.ui.checkBoxCrossLine.setCheckState(QtCore.Qt.Unchecked)
             self.checkBoxDragChanged()
         self.data.clear()
+        #self.clearBtnClicked()
+        self.clearScene()
         #load data from csv
         self.data.loadFromCSV(fileName)
-        self.clearBtnClicked()
-        self.clearScene()
-        self.drawCandleStick()
         self.assistData()
-        self.drawAssistData()
         self.setScene()
         self.setView()
+        self.drawCandleStick()
+        self.drawAssistData()
         self.toLog("Data length {0:d}".format(len(self.data.sourceData)))
     def drawCrossLineAndText (self, pos):
         """draw assisntant cross line and stick bar information
@@ -284,7 +286,7 @@ class DrawQuote(QtGui.QWidget):
             self.resizeFlag=True
         elif (event.type() == QtCore.QEvent.MouseMove):
             pos = QtCore.QPointF(self.ui.graphicsView.mapToScene(event.pos()))
-            self.ui.labelCurrent.setText("Pos:{0:.2f} Value:{1:.2f}".format(pos.x(), self.scene2Value(pos.y())))
+            self.ui.labelCurrent.setText("Pos:{0:d} Value:{1:.2f}".format(self.scene2pos(pos.x()), self.scene2Value(pos.y())))
             if self.ui.checkBoxCrossLine.isChecked()==True:
                 self.drawCrossLineAndText(pos)
             if self.ui.checkBoxDrawLine.isChecked()==True:
@@ -450,6 +452,8 @@ class DrawQuote(QtGui.QWidget):
                 mintemp=self.value2Scene(btemp[DataAnalysis.boundaryMin])
             self.viewRect.setTop(maxtemp)
             self.viewRect.setBottom(mintemp)
+            self.scaleYRation=(mintemp-maxtemp)/self.realViewRect.height()
+            #self.toLog("max{0:.2f} min{1:.2f} hei{2:.2f} rat{3:.2f}".format(maxtemp, mintemp, self.realViewRect.height(), self.scaleYRation))
             self.viewRect.setRight(posr*self.posW)
             lptemp=posr*self.posW-(realBarNum+self.scaleXOffset)*self.posW
             self.viewRect.setLeft(lptemp)
@@ -535,6 +539,38 @@ class DrawQuote(QtGui.QWidget):
                         #else:
                         #    self.toLog("pob{0:d};{1:f}".format(ipos,iline))
                         lastLine=iline
+                if self.data.drawDataArray[icount].drawType==DrawData.dtypeDiff:
+                    boundarytemp=len(self.data.drawDataArray[icount].data)
+                    for jcount in range(boundarytemp):
+                        if jcount==0:
+                            continue
+                        if jcount==boundarytemp-1:
+                            continue
+                        lastV=self.data.drawDataArray[icount].data[jcount-1]
+                        curV=self.data.drawDataArray[icount].data[jcount]
+                        if curV==0 and lastV==0:
+                            continue
+                        nextV=self.data.drawDataArray[icount].data[jcount+1]
+                        htemp=abs(self.value2Scene(self.dotW*self.scaleYRation))
+                        otemp=abs(self.value2Scene(self.dotW/2*self.scaleYRation))
+                        if curV>lastV and curV>=nextV:
+                            #self.toLog("{0:d}-big {1:.2f}".format(jcount,curV))
+                            ihigh=self.data.sourceData[jcount][DataAnalysis.gfHigh]
+                            brushtemp=QtGui.QBrush(QtGui.QColor(255,0,0))
+                            self.ui.graphicsView.scene().addEllipse(self.pos2Scene(jcount)-self.dotW/2,
+                                                                    self.value2Scene(ihigh)-htemp-otemp,
+                                                                    self.dotW,
+                                                                    htemp,
+                                                                    brush=brushtemp)
+                        if curV<lastV and curV<=nextV:
+                            #self.toLog("{0:d}-small {1:.2f}".format(jcount,curV))
+                            ilow=self.data.sourceData[jcount][DataAnalysis.gfLow]
+                            brushtemp=QtGui.QBrush(QtGui.QColor(0,255,0))
+                            self.ui.graphicsView.scene().addEllipse(self.pos2Scene(jcount)-self.dotW/2,
+                                                                    self.value2Scene(ilow)+otemp,
+                                                                    self.dotW,
+                                                                    htemp,
+                                                                    brush=brushtemp)
         except Exception as e:
             self.toLog(traceback.format_exc())
     def assistData (self):
@@ -567,16 +603,19 @@ class DrawQuote(QtGui.QWidget):
             #                         penWidth=2)
             #self.data.addToDrawArray(matemp[0])
             #self.data.addToDrawArray(matemp[1])
+            #self.data.addToDrawArray(matemp[2])
             #matemp=self.data.calKKMA(112,16,
             #                         color=QtCore.Qt.green,
             #                         penWidth=2)
             #self.data.addToDrawArray(matemp[0])
             #self.data.addToDrawArray(matemp[1])
+            #self.data.addToDrawArray(matemp[2])
             #matemp=self.data.calKKMA(28,4,
             #                         color=QtCore.Qt.blue,
             #                         penWidth=2)
             #self.data.addToDrawArray(matemp[0])
             #self.data.addToDrawArray(matemp[1])
+            #self.data.addToDrawArray(matemp[2])
             ####
             bantemp=self.data.calEmaBand(int(90*DataAnalysis.fibo), mul=DataAnalysis.fibo*12,
                                          midcolor=QtCore.Qt.darkGreen, outcolor=QtCore.Qt.darkMagenta,
@@ -590,25 +629,29 @@ class DrawQuote(QtGui.QWidget):
             self.data.addToDrawArray(bantemp[0])
             self.data.addToDrawArray(bantemp[1])
             self.data.addToDrawArray(bantemp[2])
-            matemp=self.data.calKKMA(int(70*DataAnalysis.fibo),
-                                     int(10*DataAnalysis.fibo),
-                                     color=QtCore.Qt.green,
-                                     penWidth=0)
-            self.data.addToDrawArray(matemp[0])
-            self.data.addToDrawArray(matemp[1])
-            
             matemp=self.data.calKKMA(int(175*DataAnalysis.fibo),
                                      int(25*DataAnalysis.fibo),
                                      color=QtCore.Qt.red,
                                      penWidth=0)
             self.data.addToDrawArray(matemp[0])
             self.data.addToDrawArray(matemp[1])
+            #matemp[2].enable=False
+            #self.data.addToDrawArray(matemp[2])
+            matemp=self.data.calKKMA(int(70*DataAnalysis.fibo),
+                                     int(10*DataAnalysis.fibo),
+                                     color=QtCore.Qt.green,
+                                     penWidth=0)
+            self.data.addToDrawArray(matemp[0])
+            self.data.addToDrawArray(matemp[1])
+            #matemp[2].enable=False
+            #self.data.addToDrawArray(matemp[2])
             matemp=self.data.calKKMA(int(18*DataAnalysis.fibo),
                                      int(2*DataAnalysis.fibo),
                                      color=QtCore.Qt.blue,
                                      penWidth=0)
             self.data.addToDrawArray(matemp[0])
             self.data.addToDrawArray(matemp[1])
+            self.data.addToDrawArray(matemp[2])
             ###
             
         except Exception as e:
