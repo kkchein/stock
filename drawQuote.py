@@ -11,7 +11,7 @@ from PyQt4 import QtGui
 from PyQt4 import uic
 from dataAnalysis import *
 
-class DrawQuote(QtGui.QWidget):
+class DrawQuote(QtGui.QMainWindow):
     """draw finance data from csv file
     """
     def __init__ (self):
@@ -54,51 +54,55 @@ class DrawQuote(QtGui.QWidget):
         self.drawTempPoint=[]
         self.drawMoveTempLine=[]
         ###load pyqt ui
-        self.ui=uic.loadUi("quoteView.ui", self) #load ui
+        self.ui=uic.loadUi("./res/quoteViewMainWindow.ui", self) #load ui
         ###setup main graphicsview
         self.ui.graphicsView.setScene(QtGui.QGraphicsScene(self)) #set scene
         self.ui.graphicsView.viewport().installEventFilter(self.ui)    #install event filter
-        #self.ui.graphicsView.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
-        #self.ui.graphicsView.scene().addRect(-100,-20000,100,20000, brush=QtGui.QBrush(QtGui.QColor(255,0,0)))
-        #self.ui.graphicsView.scene().addRect(-200,-40000,20,200, brush=QtGui.QBrush(QtGui.QColor(0,255,0)))
-        #self.ui.graphicsView.scene().addRect(-300,-60000,20,200, brush=QtGui.QBrush(QtGui.QColor(0,0,255)))
-        #self.ui.graphicsView.scene().addRect(-400,-80000,20,200, brush=QtGui.QBrush(QtGui.QColor(255,255,0)))
-        #self.ui.graphicsView.scene().addRect(-500,-100000,20,200, brush=QtGui.QBrush(QtGui.QColor(0,255,255)))
-        #pentemp=QtGui.QPen(QtCore.Qt.red,
-        #                   0,
-        #                   QtCore.Qt.SolidLine,
-        #                   QtCore.Qt.RoundCap,
-        #                   QtCore.Qt.RoundJoin)
-        #self.ui.graphicsView.scene().addLine(-100,
-        #                                     -600000,
-        #                                     -200,
-        #                                     -600000,
-        #                                     pentemp)
-        #temp=QtGui.QGraphicsTextItem()
-        #ftemp=QtGui.QFont()
-        #ftemp.setPixelSize(10)
-        #temp.setPlainText("123456.00")
-        #temp.setTextWidth(100)
-        #temp.setPos(-300,-600000)
-        #temp.setFont(ftemp)
-        #temp.setDefaultTextColor(QtCore.Qt.black)
-        #self.ui.graphicsView.scene().addItem(temp)
-        ###
-        #self.getRealViewRect()
-        #self.setViewScene()
-        ###setup event
-        self.ui.pushButtonLoad.clicked.connect(self.loadBtnClicked)
-        self.ui.pushButtonClearLog.clicked.connect(self.clearBtnClicked)
-        self.ui.pushButtonFit.clicked.connect(self.fitBtnClicked)
-        self.ui.pushButtonZoomIn.clicked.connect(self.zoomInBtnClicked)
-        self.ui.pushButtonZoomOut.clicked.connect(self.zoomOutBtnClicked)
-        self.ui.checkBoxCrossLine.stateChanged.connect(self.checkBoxCrossLineChanged)
-        self.ui.checkBoxDrag.stateChanged.connect(self.checkBoxDragChanged)
-        self.ui.checkBoxDrawLine.stateChanged.connect(self.checkBoxDrawLineChanged)
+        ###load toolbar button
+        self.actionLoad = QtGui.QAction(QtGui.QIcon('./res/Actions-document-open-icon.png'),
+                                        "Open stick data", self, triggered=self.loadBtnClicked)
+        self.ui.toolBar.addAction(self.actionLoad)
+        ###clear log toolbar button
+        self.actionClearLog = QtGui.QAction(QtGui.QIcon('./res/Actions-edit-clear-icon.png'),
+                                            "Clear log window", self, triggered=self.clearBtnClicked)
+        self.ui.toolBar.addAction(self.actionClearLog)
+        ###fit windows toolbar button
+        self.actionFitWindow = QtGui.QAction(QtGui.QIcon('./res/Printing-Fit-To-Width-icon.png'),
+                                             "Fit window", self, triggered=self.fitBtnClicked)
+        self.ui.toolBar.addAction(self.actionFitWindow)
+        ###zoom in toolbar button
+        self.actionZoomIn = QtGui.QAction(QtGui.QIcon('./res/Zoom-In-icon.png'),
+                                          "Zoom In", self, triggered=self.zoomInBtnClicked)
+        self.ui.toolBar.addAction(self.actionZoomIn)
+        ###zoom out toolbar button
+        self.actionZoomOut = QtGui.QAction(QtGui.QIcon('./res/Zoom-Out-icon.png'),
+                                           "Zoom Out", self, triggered=self.zoomOutBtnClicked)
+        self.ui.toolBar.addAction(self.actionZoomOut)
+        ###cross line  toolbar button
+        self.actionCrossLine = QtGui.QAction(QtGui.QIcon('./res/add-icon.png'),
+                                             "Assistant cross line", self, triggered=self.checkBoxCrossLineChanged)
+        self.actionCrossLine.setCheckable(True)
+        self.ui.toolBar.addAction(self.actionCrossLine)
+        ###drag toolbar button
+        self.actionDrag = QtGui.QAction(QtGui.QIcon('./res/Drag-icon.png'),
+                                        "Drag view", self, triggered=self.checkBoxDragChanged)
+        self.actionDrag.setCheckable(True)
+        self.ui.toolBar.addAction(self.actionDrag)
+        ###draw line toolbar button
+        self.actionDrawLine = QtGui.QAction(QtGui.QIcon('./res/Line-icon.png'),
+                                            "Draw line", self, triggered=self.checkBoxDrawLineChanged)
+        self.actionDrawLine.setCheckable(True)
+        self.ui.toolBar.addAction(self.actionDrawLine)
+        ###setup status bar
+        self.labelCurrent=QtGui.QLabel(self)
+        self.labelCurrent.setMinimumWidth(150)
+        self.ui.statusbar.addWidget(self.labelCurrent)
+        self.labelValue=QtGui.QLabel(self)
+        self.ui.statusbar.addWidget(self.labelValue)
         ###
         self.ui.show()
     def checkBoxDrawLineChanged (self):
-        if self.ui.checkBoxDrawLine.isChecked()==False:
+        if self.actionDrawLine.isChecked()==False:
             self.drawTempPoint=[]
             if len(self.drawTempLine)!=0:
                 for icount in range(len(self.drawTempLine)):
@@ -109,12 +113,12 @@ class DrawQuote(QtGui.QWidget):
                     self.ui.graphicsView.scene().removeItem(self.drawMoveTempLine[icount])
                 self.drawMoveTempLine=[]
     def checkBoxDragChanged (self):
-        if self.ui.checkBoxDrag.isChecked()==True:
+        if self.actionDrag.isChecked()==True:
             self.ui.graphicsView.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
         else:
             self.ui.graphicsView.setDragMode(QtGui.QGraphicsView.NoDrag)
     def checkBoxCrossLineChanged (self):
-        if self.ui.checkBoxCrossLine.isChecked()==False:
+        if self.actionCrossLine.isChecked()==False:
             if len(self.crossTempLine)!=0:
                 for icount in range(len(self.crossTempLine)):
                     self.ui.graphicsView.scene().removeItem(self.crossTempLine[icount])
@@ -170,12 +174,16 @@ class DrawQuote(QtGui.QWidget):
         Raises:
         """
         ###open file dialog
-        fileName = QtGui.QFileDialog.getOpenFileName(self, "Open File", ".", "csv (*.csv)")
+        if os.path.exists("./csv")==True:
+            csvdir="./csv/"
+        else:
+            csvdir="./"
+        fileName = QtGui.QFileDialog.getOpenFileName(self, "Open File", csvdir, "csv (*.csv)")
         if os.path.exists(fileName)==False:
             self.toLog(fileName+" doesn't exist")
             return
-        if self.ui.checkBoxCrossLine.isChecked()==True:
-            self.ui.checkBoxCrossLine.setCheckState(QtCore.Qt.Unchecked)
+        if self.actionCrossLine.isChecked()==True:
+            self.actionCrossLine.setChecked(False)
             self.checkBoxDragChanged()
         self.data.clear()
         #self.clearBtnClicked()
@@ -209,14 +217,14 @@ class DrawQuote(QtGui.QWidget):
                 ilow=iarray[DataAnalysis.gfLow]
                 iend=iarray[DataAnalysis.gfEnd]
                 ivol=iarray[DataAnalysis.gfVol]
-                self.ui.labelValue.setText("{0:s} End:{1:.2f}  start:{2:.2f} High:{3:.2f} Low:{4:.2f} Vol:{5:.2f}".format(datetime.datetime.strftime(idate, DataAnalysis.dataStrType),
+                self.labelValue.setText("{0:s} End:{1:.2f}  start:{2:.2f} High:{3:.2f} Low:{4:.2f} Vol:{5:.2f}".format(datetime.datetime.strftime(idate, DataAnalysis.dataStrType),
                                                                                                                           iend,
                                                                                                                           istart,
                                                                                                                           ihigh,
                                                                                                                           ilow,
                                                                                                                           ivol))
             else:
-                self.ui.labelValue.setText("")
+                self.labelValue.setText("")
         if len(self.crossTempLine)!=0:
             for icount in range(len(self.crossTempLine)):
                 self.ui.graphicsView.scene().removeItem(self.crossTempLine[icount])
@@ -243,7 +251,7 @@ class DrawQuote(QtGui.QWidget):
         if (event.type() == QtCore.QEvent.MouseButtonPress):
             pos = QtCore.QPointF(self.ui.graphicsView.mapToScene(event.pos()))
             if event.button() == QtCore.Qt.LeftButton:
-                if self.ui.checkBoxDrawLine.isChecked()==True:
+                if self.actionDrawLine.isChecked()==True:
                     self.drawTempPoint.append(pos)
                     if len(self.drawMoveTempLine)!=0:
                         for icount in range(len(self.drawMoveTempLine)):
@@ -258,8 +266,8 @@ class DrawQuote(QtGui.QWidget):
                         self.drawTempPoint=[]
                 #pass
             elif event.button() == QtCore.Qt.RightButton:
-                if self.ui.checkBoxCrossLine.isChecked()==False:
-                    self.ui.checkBoxCrossLine.setCheckState(QtCore.Qt.Checked)
+                if self.actionCrossLine.isChecked()==False:
+                    self.actionCrossLine.setChecked(True)
                     self.checkBoxDragChanged()
                     self.drawCrossLineAndText(pos)
                 if len(self.data.drawDataArray)!=0:
@@ -286,10 +294,10 @@ class DrawQuote(QtGui.QWidget):
             self.resizeFlag=True
         elif (event.type() == QtCore.QEvent.MouseMove):
             pos = QtCore.QPointF(self.ui.graphicsView.mapToScene(event.pos()))
-            self.ui.labelCurrent.setText("Pos:{0:d} Value:{1:.2f}".format(self.scene2pos(pos.x()), self.scene2Value(pos.y())))
-            if self.ui.checkBoxCrossLine.isChecked()==True:
+            self.labelCurrent.setText("Pos:{0:d} Value:{1:.2f}".format(self.scene2pos(pos.x()), self.scene2Value(pos.y())))
+            if self.actionCrossLine.isChecked()==True:
                 self.drawCrossLineAndText(pos)
-            if self.ui.checkBoxDrawLine.isChecked()==True:
+            if self.actionDrawLine.isChecked()==True:
                 if len(self.drawMoveTempLine)!=0:
                     for icount in range(len(self.drawMoveTempLine)):
                         self.ui.graphicsView.scene().removeItem(self.drawMoveTempLine[icount])
@@ -306,8 +314,8 @@ class DrawQuote(QtGui.QWidget):
             elif event.button() == QtCore.Qt.RightButton:
                 pass
         elif (event.type() == QtCore.QEvent.WindowDeactivate):
-            if self.ui.checkBoxCrossLine.isChecked()==True:
-                self.ui.checkBoxCrossLine.setCheckState(QtCore.Qt.Unchecked)
+            if self.actionCrossLine.isChecked()==True:
+                self.actionCrossLine.setChecked(False)
                 self.checkBoxDragChanged()
         else:
             pass

@@ -1,3 +1,8 @@
+#   X00_08  2015/04/13  K.K.Chien
+#       1. change drawquote to QMainWindow windows base
+#       2. use toolbar and status bar
+#       3. move csv files to directory ./csv
+#       4. move resource files to directory ./res
 #   X00_07  2015/04/10  K.K.Chien
 #       1. caculate kkma diff
 #       2. draw kkma diff top bottom dot

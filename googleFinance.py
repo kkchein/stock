@@ -8,6 +8,7 @@ import datetime
 import csv
 import time
 import sys
+import os
 from dataAnalysis import *
 
 
@@ -146,9 +147,13 @@ if __name__ == "__main__":
                 "INDEXBOM:SENSEX"]      #孟買敏感30指數、BSE SENSEX
     gfc=GFClass()
     da=DataAnalysis()
+    if os.path.exists("./csv")==True:
+        csvdir="./csv/"
+    else:
+        csvdir="./"
     for symbolstr in symbollist:
         array=[]
-        filename=symbol2Filename(symbolstr)
+        filename=csvdir+symbol2Filename(symbolstr)
         print(filename+".csv processing...")
         sys.stdout.flush()
         da.csv2list(filename+".csv", array)

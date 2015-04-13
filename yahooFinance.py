@@ -7,6 +7,7 @@ import datetime
 import time
 import csv
 import sys
+import os
 from dataAnalysis import *
 
 #"http://ichart.yahoo.com/table.csv?s=^TWII&a=2&b=2&c=2014"
@@ -134,9 +135,13 @@ if __name__ == "__main__":
     #yfc.list2csv("temp.csv", array)
     #yfc.csv2list("temp.csv", array)
     da=DataAnalysis()
+    if os.path.exists("./csv")==True:
+        csvdir="./csv/"
+    else:
+        csvdir="./"
     for symbolstr in symbollist:
         array=[]
-        filename=symbol2Filename(symbolstr)
+        filename=csvdir+symbol2Filename(symbolstr)
         print(filename+" processing...")
         sys.stdout.flush()
         da.csv2list(filename+".csv", array)
