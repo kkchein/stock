@@ -53,6 +53,7 @@ class DrawQuote(QtGui.QMainWindow):
         self.drawTempLine=[]
         self.drawTempPoint=[]
         self.drawMoveTempLine=[]
+        self.dtypeDiffTemp=[]
         ###load pyqt ui
         self.ui=uic.loadUi("./res/quoteViewMainWindow.ui", self) #load ui
         ###setup main graphicsview
@@ -78,6 +79,16 @@ class DrawQuote(QtGui.QMainWindow):
         self.actionZoomOut = QtGui.QAction(QtGui.QIcon('./res/Zoom-Out-icon.png'),
                                            "Zoom Out", self, triggered=self.zoomOutBtnClicked)
         self.ui.toolBar.addAction(self.actionZoomOut)
+        ###go left toolbar button
+        self.actionGoLeft = QtGui.QAction(QtGui.QIcon('./res/Actions-go-previous-icon.png'),
+                                          "Go left one stick bbar (Ctrl+,)", self, triggered=self.goLeftBtnClicked)
+        self.actionGoLeft.setShortcut("Ctrl+,")
+        self.ui.toolBar.addAction(self.actionGoLeft)
+        ###go right toolbar button
+        self.actionGoRight = QtGui.QAction(QtGui.QIcon('./res/Actions-go-next-icon.png'),
+                                           "Go right one stick bbar(Ctrl+.)", self, triggered=self.goRightBtnClicked)
+        self.actionGoRight.setShortcut("Ctrl+.")
+        self.ui.toolBar.addAction(self.actionGoRight)
         ###cross line  toolbar button
         self.actionCrossLine = QtGui.QAction(QtGui.QIcon('./res/add-icon.png'),
                                              "Assistant cross line", self, triggered=self.checkBoxCrossLineChanged)
@@ -101,6 +112,10 @@ class DrawQuote(QtGui.QMainWindow):
         self.ui.statusbar.addWidget(self.labelValue)
         ###
         self.ui.show()
+    def goRightBtnClicked (self):
+        self.setView(self.getViewRightPos()+1)
+    def goLeftBtnClicked (self):
+        self.setView(self.getViewRightPos()-1)
     def checkBoxDrawLineChanged (self):
         if self.actionDrawLine.isChecked()==False:
             self.drawTempPoint=[]
@@ -281,7 +296,7 @@ class DrawQuote(QtGui.QMainWindow):
                         if laststr!=strtemp:
                             laststr=strtemp
                             resultstr=resultstr+"\n"
-                        resultstr=resultstr+"{0:s} - {1:.2f};  ".format(self.data.drawDataArray[icount].caption,
+                        resultstr=resultstr+"{0:s} : {1:.2f};  ".format(self.data.drawDataArray[icount].caption,
                                                                         self.data.drawDataArray[icount][ipos])
                     if resultstr!="":
                         self.toLog(resultstr)
@@ -290,6 +305,7 @@ class DrawQuote(QtGui.QMainWindow):
                 self.resizeFlag=False
                 self.getRealViewRect()
                 self.setView()
+                self.drawAssistData(DrawData.dtypeDiff)
         elif (event.type() == QtCore.QEvent.Resize):
             self.resizeFlag=True
         elif (event.type() == QtCore.QEvent.MouseMove):
@@ -393,6 +409,16 @@ class DrawQuote(QtGui.QMainWindow):
         Returns:
         Raises:
         """
+        del self.crossTempLine
+        self.crossTempLine=[]
+        del self.drawTempLine
+        self.drawTempLine=[]
+        del self.drawTempPoint
+        self.drawTempPoint=[]
+        del self.drawMoveTempLine
+        self.drawMoveTempLine=[]
+        del self.dtypeDiffTemp
+        self.dtypeDiffTemp=[]
         self.ui.graphicsView.scene().clear()
         self.scaleXOffset=0
     def toLog (self, istr):
@@ -508,7 +534,7 @@ class DrawQuote(QtGui.QMainWindow):
 
     def final (self):
         pass
-    def drawAssistData (self):
+    def drawAssistData (self, itype=DrawData.dtypeNone):
         """draw assistant line
 
         Args:
@@ -518,10 +544,16 @@ class DrawQuote(QtGui.QMainWindow):
         try:
             if len(self.data.drawDataArray)==0:
                 return
+            if len(self.dtypeDiffTemp)>0:
+                for icount in range(len(self.dtypeDiffTemp)):
+                    self.ui.graphicsView.scene().removeItem(self.dtypeDiffTemp[icount])
+                self.dtypeDiffTemp=[]
             for icount in range(len(self.data.drawDataArray)):
                 if self.data.drawDataArray[icount].enable==False:
                     continue
                 if self.data.drawDataArray[icount].drawType==DrawData.dtypeLine:
+                    if itype!=DrawData.dtypeLine and itype!=DrawData.dtypeNone:
+                        continue
                     lastLine=0
                     for jcount in range(len(self.data.drawDataArray[icount].data)):
                         iline=self.data.drawDataArray[icount][jcount]
@@ -548,6 +580,8 @@ class DrawQuote(QtGui.QMainWindow):
                         #    self.toLog("pob{0:d};{1:f}".format(ipos,iline))
                         lastLine=iline
                 if self.data.drawDataArray[icount].drawType==DrawData.dtypeDiff:
+                    if itype!=DrawData.dtypeDiff and itype!=DrawData.dtypeNone:
+                        continue
                     boundarytemp=len(self.data.drawDataArray[icount].data)
                     for jcount in range(boundarytemp):
                         if jcount==0:
@@ -565,20 +599,20 @@ class DrawQuote(QtGui.QMainWindow):
                             #self.toLog("{0:d}-big {1:.2f}".format(jcount,curV))
                             ihigh=self.data.sourceData[jcount][DataAnalysis.gfHigh]
                             brushtemp=QtGui.QBrush(QtGui.QColor(255,0,0))
-                            self.ui.graphicsView.scene().addEllipse(self.pos2Scene(jcount)-self.dotW/2,
-                                                                    self.value2Scene(ihigh)-htemp-otemp,
-                                                                    self.dotW,
-                                                                    htemp,
-                                                                    brush=brushtemp)
+                            self.dtypeDiffTemp.append(self.ui.graphicsView.scene().addEllipse(self.pos2Scene(jcount)-self.dotW/2,
+                                                                                              self.value2Scene(ihigh)-htemp-otemp,
+                                                                                              self.dotW,
+                                                                                              htemp,
+                                                                                              brush=brushtemp))
                         if curV<lastV and curV<=nextV:
                             #self.toLog("{0:d}-small {1:.2f}".format(jcount,curV))
                             ilow=self.data.sourceData[jcount][DataAnalysis.gfLow]
                             brushtemp=QtGui.QBrush(QtGui.QColor(0,255,0))
-                            self.ui.graphicsView.scene().addEllipse(self.pos2Scene(jcount)-self.dotW/2,
-                                                                    self.value2Scene(ilow)+otemp,
-                                                                    self.dotW,
-                                                                    htemp,
-                                                                    brush=brushtemp)
+                            self.dtypeDiffTemp.append(self.ui.graphicsView.scene().addEllipse(self.pos2Scene(jcount)-self.dotW/2,
+                                                                                              self.value2Scene(ilow)+otemp,
+                                                                                              self.dotW,
+                                                                                              htemp,
+                                                                                              brush=brushtemp))
         except Exception as e:
             self.toLog(traceback.format_exc())
     def assistData (self):

@@ -11,8 +11,9 @@ from PyQt4 import QtCore
 class DrawData:
     """draw data object
     """
-    dtypeLine=0
-    dtypeDiff=1
+    dtypeNone=0
+    dtypeLine=1
+    dtypeDiff=2
     def __init__ (self):
         """constructor
 

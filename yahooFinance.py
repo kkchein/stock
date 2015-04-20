@@ -127,6 +127,7 @@ class YFClass():
 def symbol2Filename (isymbol):
     return symbolstr.replace("^","Index_")
 if __name__ == "__main__":
+    #^TWII
     symbollist=["^STI",     #^STI - 新加坡海峽時報指數
                 "^JKSE"]    #^JKSE - 印尼雅加達綜合指數 Jakarta Composite Index
     yfc=YFClass()

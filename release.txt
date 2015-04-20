@@ -1,3 +1,8 @@
+#   X00_09  2015/04/20  K.K.Chien
+#       1. add diff drawdata type
+#       2. draw diff dot
+#       3. add go left, go right button in toolbar
+#       4. correct data fail issue
 #   X00_08  2015/04/13  K.K.Chien
 #       1. change drawquote to QMainWindow windows base
 #       2. use toolbar and status bar

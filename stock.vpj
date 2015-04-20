@@ -3,81 +3,82 @@
     Version="10.0"
     VendorName="SlickEdit"
     WorkingDir=".">
-    <Files>
-        <Folder
-            Name="Source Files"
-            Filters="*.py">
-            <F N="dataAnalysis.py"/>
-            <F N="drawQuote.py"/>
-            <F N="googleFinance.py"/>
-            <F N="PyqtQevent.py"/>
-            <F N="setup.py"/>
-            <F N="unquote.py"/>
-            <F N="dist_unquote/tcl/tix8.4.3/pref/WmDefault.py"/>
-            <F N="yahooFinance.py"/>
-        </Folder>
-        <Folder
-            Name="Other Files"
-            Filters="">
-            <F N="release.txt"/>
-        </Folder>
-    </Files>
     <Config
-        Name="Debug"
-        DebugCallbackName="pydbgp"
-        Type="python"
+        Name="Release"
         OutputFile=""
-        AppType="python"
         CompilerConfigName="">
         <Menu>
             <Target
-                Name="Execute"
-                MenuCaption="E&amp;xecute"
-                Dialog="_python_options_form Run"
+                Name="Compile"
+                MenuCaption="&amp;Compile"
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveCurrent"
+                RunFromDir="%rw">
+                <Exec/>
+            </Target>
+            <Target
+                Name="Build"
+                MenuCaption="&amp;Build"
                 CaptureOutputWith="ProcessBuffer"
                 SaveOption="SaveWorkspaceFiles"
-                RunFromDir="%rw"
-                Deletable="0"
-                ClearProcessBuffer="1">
-                <Exec CmdLine='"%(SLICKEDIT_PYTHON_EXE)" %(SLICKEDIT_PYTHON_EXECUTE_ARGS) "%f" %~other'/>
+                RunFromDir="%rw">
+                <Exec/>
+            </Target>
+            <Target
+                Name="Rebuild"
+                MenuCaption="&amp;Rebuild"
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveWorkspaceFiles"
+                RunFromDir="%rw">
+                <Exec/>
             </Target>
             <Target
                 Name="Debug"
                 MenuCaption="&amp;Debug"
-                Dialog="_python_options_form Debug"
-                CaptureOutputWith="ProcessBuffer"
-                SaveOption="SaveNone"
+                SaveOption="SaveWorkspaceFiles"
                 RunFromDir="%rw"
-                Deletable="0">
-                <Exec
-                    CmdLine="python_debug"
-                    Type="Slick-C"/>
+                CaptureOutputWith="ProcessBuffer"
+                ClearProcessBuffer="1">
+                <Exec CmdLine="python -m pdb %f"/>
             </Target>
             <Target
-                Name="Python Options"
-                MenuCaption="Python &amp;Options"
-                ShowOnMenu="HideIfNoCmdLine"
-                Deletable="0">
-                <Exec
-                    CmdLine="pythonoptions"
-                    Type="Slick-C"/>
+                Name="Execute"
+                MenuCaption="E&amp;xecute"
+                SaveOption="SaveWorkspaceFiles"
+                RunFromDir="%rw"
+                CaptureOutputWith="ProcessBuffer"
+                ClearProcessBuffer="1">
+                <Exec CmdLine="python %f"/>
             </Target>
         </Menu>
-        <List Name="Python Options">
-        </List>
-        <List Name="pydbgp Options">
-            <Item
-                Name="ServerHost"
-                Value="127.0.0.1"/>
-            <Item
-                Name="ServerPort"
-                Value="0"/>
-            <Item
-                Name="ListenInBackground"
-                Value="1"/>
-            <Item
-                Name="show_hidden"
-                Value="0"/>
-        </List>
     </Config>
+    <CustomFolders>
+        <Folder
+            Name="Source Files"
+            Filters="*.c;*.C;*.cc;*.cpp;*.cp;*.cxx;*.c++;*.prg;*.pas;*.dpr;*.asm;*.s;*.bas;*.java;*.cs;*.sc;*.e;*.cob;*.html;*.rc;*.tcl;*.py;*.pl;*.d">
+        </Folder>
+        <Folder
+            Name="Header Files"
+            Filters="*.h;*.H;*.hh;*.hpp;*.hxx;*.inc;*.sh;*.cpy;*.if"/>
+        <Folder
+            Name="Resource Files"
+            Filters="*.ico;*.cur;*.dlg"/>
+        <Folder
+            Name="Bitmaps"
+            Filters="*.bmp"/>
+        <Folder
+            Name="Other Files"
+            Filters="">
+        </Folder>
+    </CustomFolders>
+    <Files AutoFolders="DirectoryView">
+        <F N="dataAnalysis.py"/>
+        <F N="drawQuote.py"/>
+        <F N="googleFinance.py"/>
+        <F N="PyqtQevent.py"/>
+        <F N="release.txt"/>
+        <F N="setup.py"/>
+        <F N="unquote.py"/>
+        <F N="yahooFinance.py"/>
+    </Files>
 </Project>
