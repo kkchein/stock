@@ -1,3 +1,7 @@
+#   X00_0A  2015/04/22  K.K.Chien
+#       1. correct calMa isue
+#       2. add calHmaBand
+#       3. enlarge scene for one tick
 #   X00_09  2015/04/20  K.K.Chien
 #       1. add diff drawdata type
 #       2. draw diff dot

@@ -205,7 +205,8 @@ class DataAnalysis():
         Returns:
         Raises:
         """
-        self.sourceData=[]  #clear data
+        #self.sourceData=[]  #clear data
+        self.clear()
         self.csv2list(ifname, self.sourceData)
         self.drawDataArray=[]
         vtemp=self.getValueBoundary()
@@ -372,35 +373,29 @@ class DataAnalysis():
         if inputData==None:
             if len(self.sourceData)==0:
                 return None
-            inputData=self.sourceData
-        #elif type(inputData)!=DrawData:
-        #    return None
-        result=DrawData(DrawData.dtypeMa)
+            inputData=self.sourcedata2Drawdata(DataAnalysis.gfEnd)
+        elif type(inputData)!=DrawData:
+            return None
+        result=DrawData()
         result.penW=penWidth
         result.color=color
         if capStr=="":
             result.caption="MA{0:d}".format(period)
         else:
             result.caption=capStr
-        for icount in range(len(inputData)):
-            data2.calMAOnetick(period, result, inputData[icount][DataAnalysis.gfEnd])
-        #vtemp=collections.deque([]) #queue
-        #if inputData==None:
-        #    loopLen=len(self.sourceData)
-        #else:
-        #    loopLen=len(inputData.data)
-        #for icount in range(loopLen):
-        #    if inputData==None:
-        #        vtemp.append(self.sourceData[icount][DataAnalysis.gfEnd])
-        #    else:
-        #        vtemp.append(inputData.data[icount])
-        #    ftemp=0.0;
-        #    if icount>=period-1:
-        #        for jcount in range(period):
-        #            ftemp=ftemp+vtemp[jcount]
-        #        ftemp=ftemp/period
-        #        vtemp.popleft()
-        #    result.data.append(ftemp)
+        #for icount in range(len(inputData)):
+        #    data2.calMAOnetick(period, result, inputData[icount][DataAnalysis.gfEnd])
+        vtemp=collections.deque([]) #queue
+        loopLen=len(inputData)
+        for icount in range(loopLen):
+            vtemp.append(inputData[icount])                
+            ftemp=0.0;
+            if icount>=period-1:
+                for jcount in range(period):
+                    ftemp=ftemp+vtemp[jcount]
+                ftemp=ftemp/period
+                vtemp.popleft()
+            result.data.append(ftemp)
         return result
     def calWMA (self, period, inputData=None, capStr="", color=QtCore.Qt.black, penWidth=0):
         if inputData==None:
@@ -598,10 +593,75 @@ class DataAnalysis():
             hiBand.data.append(midBand.data[icount]+offset*mul)
             loBand.data.append(midBand.data[icount]-offset*mul)
         return [hiBand, midBand, loBand]
-
+    def calHmaBand (self, period, mul=1, inputData=None, capStr="",
+                    midcolor=QtCore.Qt.black,  outcolor=QtCore.Qt.black,
+                    midpenWidth=0, outpenWidth=0):
+        if inputData==None:
+            if len(self.sourceData)==0:
+                return None
+        elif len(inputData)!=3:
+            return None
+        elif type(inputData[0])!=DrawData or type(inputData[1])!=DrawData or type(inputData[2])!=DrawData:
+            return None
+        ####
+        if inputData==None:
+            midBand=self.calHMA(period,color=midcolor,penWidth=midpenWidth)
+        else:
+            midBand=self.calHMA(period, inputData=inputData[2],color=midcolor,penWidth=midpenWidth)
+        if capStr=="":
+            midBand.caption="HBand{0:d}_M".format(period)
+        else:
+            midBand.caption=capStr+"_M"
+        ####
+        if inputData==None:
+            srchi=self.sourcedata2Drawdata(DataAnalysis.gfHigh)
+            if srchi==None:
+                return None
+            hitemp=self.calHMA(period, inputData=srchi)
+        else:
+            hitemp=self.calHMA(period, inputData=inputData[0])
+        if hitemp==None:
+            return None
+        ####
+        if inputData==None:
+            srclo=self.sourcedata2Drawdata(DataAnalysis.gfLow)
+            if srclo==None:
+                return None
+            lotemp=self.calHMA(period, inputData=srclo)
+        else:
+            lotemp=self.calHMA(period, inputData=inputData[0])
+        if hitemp==None:
+            return None
+        ####
+        hiBand=DrawData()
+        hiBand.penW=outpenWidth
+        hiBand.color=outcolor
+        if capStr=="":
+            hiBand.caption="HBand{0:d}_H".format(period)
+        else:
+            hiBand.caption=capStr+"_H"
+        loBand=DrawData()
+        loBand.penW=outpenWidth
+        loBand.color=outcolor
+        if capStr=="":
+            loBand.caption="HBand{0:d}_L".format(period)
+        else:
+            loBand.caption=capStr+"_L"
+        for icount in range(len(self.sourceData)):
+            temph=hitemp.data[icount]-midBand.data[icount]
+            templ=midBand.data[icount]-lotemp.data[icount]
+            if temph > templ:
+                offset=temph
+            else:
+                offset=templ
+            hiBand.data.append(midBand.data[icount]+offset*mul)
+            loBand.data.append(midBand.data[icount]-offset*mul)
+            #hiBand.data.append(midBand.data[icount]+temph*mul)
+            #loBand.data.append(midBand.data[icount]-templ*mul)
+        return [hiBand, midBand, loBand]
 if __name__ == "__main__":
     data=DataAnalysis()
-    data.loadFromCSV("test.csv")
+    data.loadFromCSV("./csv/test.csv")
     bantemp=data.calEmaBand(int(90*DataAnalysis.fibo), mul=DataAnalysis.fibo*12,
                             midcolor=QtCore.Qt.darkGreen, outcolor=QtCore.Qt.darkMagenta,
                             midpenWidth=0, outpenWidth=3)

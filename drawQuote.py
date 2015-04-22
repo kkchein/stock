@@ -447,7 +447,7 @@ class DrawQuote(QtGui.QMainWindow):
         #self.toLog("xxx {0:f}, {1:f}".format(ptemp.x(),ptemp.y()))
     def setScene (self):
         viewVisibleBar=self.realViewRect.width()/self.posW
-        datawidth=(len(self.data.sourceData))*self.posW
+        datawidth=(len(self.data.sourceData)+1)*self.posW
         #set scene
         self.sceneRect.setRight(datawidth)
         ltemp=datawidth-self.realViewRect.width()
@@ -624,10 +624,10 @@ class DrawQuote(QtGui.QMainWindow):
         """
         try:
             ####
-            #self.data.addToDrawArray(self.data.calMA(10, color=QtCore.Qt.red))
-            #self.data.addToDrawArray(self.data.calWMA(10, color=QtCore.Qt.green))
-            #self.data.addToDrawArray(self.data.calEMA(10, color=QtCore.Qt.blue))
-            #self.data.addToDrawArray(self.data.calHMA(10, color=QtCore.Qt.magenta))
+            #self.data.addToDrawArray(self.data.calMA( int(30*DataAnalysis.fibo), color=QtCore.Qt.red))
+            #self.data.addToDrawArray(self.data.calWMA(int(30*DataAnalysis.fibo), color=QtCore.Qt.green))
+            #self.data.addToDrawArray(self.data.calEMA(int(30*DataAnalysis.fibo), color=QtCore.Qt.blue))
+            #self.data.addToDrawArray(self.data.calHMA(int(30*DataAnalysis.fibo), color=QtCore.Qt.magenta))
             ####option 1
             #bantemp=self.data.calEmaBand(int(90*DataAnalysis.fibo), mul=DataAnalysis.fibo*12,
             #                             midcolor=QtCore.Qt.darkGreen, outcolor=QtCore.Qt.darkMagenta,
@@ -677,16 +677,12 @@ class DrawQuote(QtGui.QMainWindow):
                                      penWidth=0)
             self.data.addToDrawArray(matemp[0])
             self.data.addToDrawArray(matemp[1])
-            #matemp[2].enable=False
-            #self.data.addToDrawArray(matemp[2])
             matemp=self.data.calKKMA(int(70*DataAnalysis.fibo),
                                      int(10*DataAnalysis.fibo),
                                      color=QtCore.Qt.green,
                                      penWidth=0)
             self.data.addToDrawArray(matemp[0])
             self.data.addToDrawArray(matemp[1])
-            #matemp[2].enable=False
-            #self.data.addToDrawArray(matemp[2])
             matemp=self.data.calKKMA(int(18*DataAnalysis.fibo),
                                      int(2*DataAnalysis.fibo),
                                      color=QtCore.Qt.blue,
@@ -695,7 +691,26 @@ class DrawQuote(QtGui.QMainWindow):
             self.data.addToDrawArray(matemp[1])
             self.data.addToDrawArray(matemp[2])
             ###
-            
+            #bantemp=self.data.calEmaBand(int(15*DataAnalysis.fibo), mul=DataAnalysis.fibo*2,
+            #                             midcolor=QtCore.Qt.lightGray, outcolor=QtCore.Qt.magenta,
+            #                             midpenWidth=0, outpenWidth=3)
+            #self.data.addToDrawArray(bantemp[0])
+            #self.data.addToDrawArray(bantemp[1])
+            #self.data.addToDrawArray(bantemp[2])
+            #bantemp=self.data.calHmaBand(int(30*DataAnalysis.fibo), mul=DataAnalysis.fibo*3.5,
+            #                             midcolor=QtCore.Qt.darkGreen, outcolor=QtCore.Qt.darkMagenta,
+            #                             midpenWidth=0, outpenWidth=3)
+            #self.data.addToDrawArray(bantemp[0])
+            #self.data.addToDrawArray(bantemp[1])
+            #self.data.addToDrawArray(bantemp[2])
+            #matemp=self.data.calKKMA(int(18*DataAnalysis.fibo),
+            #                         int(2*DataAnalysis.fibo),
+            #                         color=QtCore.Qt.blue,
+            #                         penWidth=0)
+            #self.data.addToDrawArray(matemp[0])
+            #self.data.addToDrawArray(matemp[1])
+            self.data.addToDrawArray(matemp[2])
+
         except Exception as e:
             self.toLog(traceback.format_exc())
 
