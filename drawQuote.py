@@ -211,6 +211,17 @@ class DrawQuote(QtGui.QMainWindow):
         self.drawCandleStick()
         self.drawAssistData()
         self.toLog("Data length {0:d}".format(len(self.data.sourceData)))
+    def clearCrossLine (self):
+        """clear corss line on scene
+
+        Args:
+        Returns:
+        Raises:
+        """
+        if len(self.crossTempLine)!=0:
+            for icount in range(len(self.crossTempLine)):
+                self.ui.graphicsView.scene().removeItem(self.crossTempLine[icount])
+            self.crossTempLine=[]
     def drawCrossLineAndText (self, pos):
         """draw assisntant cross line and stick bar information
 
@@ -240,10 +251,7 @@ class DrawQuote(QtGui.QMainWindow):
                                                                                                                           ivol))
             else:
                 self.labelValue.setText("")
-        if len(self.crossTempLine)!=0:
-            for icount in range(len(self.crossTempLine)):
-                self.ui.graphicsView.scene().removeItem(self.crossTempLine[icount])
-            self.crossTempLine=[]
+        self.clearCrossLine()
         self.crossTempLine.append(self.ui.graphicsView.scene().addLine(self.pos2Scene(ipos),
                                                                   self.sceneRect.bottom(),
                                                                   self.pos2Scene(ipos),
@@ -280,11 +288,6 @@ class DrawQuote(QtGui.QMainWindow):
                         del self.drawTempPoint
                         self.drawTempPoint=[]
                 #pass
-            elif event.button() == QtCore.Qt.RightButton:
-                if self.actionCrossLine.isChecked()==False:
-                    self.actionCrossLine.setChecked(True)
-                    self.checkBoxDragChanged()
-                    self.drawCrossLineAndText(pos)
                 if len(self.data.drawDataArray)!=0:
                     ipos=self.scene2pos(pos.x())
                     laststr=""
@@ -300,6 +303,15 @@ class DrawQuote(QtGui.QMainWindow):
                                                                         self.data.drawDataArray[icount][ipos])
                     if resultstr!="":
                         self.toLog(resultstr)
+            elif event.button() == QtCore.Qt.RightButton:
+                if self.actionCrossLine.isChecked()==False:
+                    self.actionCrossLine.setChecked(True)
+                    self.checkBoxDragChanged()
+                    self.drawCrossLineAndText(pos)
+                else:
+                    self.actionCrossLine.setChecked(False)
+                    self.checkBoxDragChanged()
+                    self.clearCrossLine()
         elif (event.type() == QtCore.QEvent.Paint):
             if self.resizeFlag==True:
                 self.resizeFlag=False
@@ -333,6 +345,7 @@ class DrawQuote(QtGui.QMainWindow):
             if self.actionCrossLine.isChecked()==True:
                 self.actionCrossLine.setChecked(False)
                 self.checkBoxDragChanged()
+                self.clearCrossLine()
         else:
             pass
             #self.toLog(PyqtQevent.eventStr[event.type()])
@@ -691,14 +704,14 @@ class DrawQuote(QtGui.QMainWindow):
             self.data.addToDrawArray(matemp[1])
             self.data.addToDrawArray(matemp[2])
             ###
-            #bantemp=self.data.calEmaBand(int(15*DataAnalysis.fibo), mul=DataAnalysis.fibo*2,
-            #                             midcolor=QtCore.Qt.lightGray, outcolor=QtCore.Qt.magenta,
+            #bantemp=self.data.calHmaBand(int(30*DataAnalysis.fibo), mul=DataAnalysis.fibo*3.5,
+            #                             midcolor=QtCore.Qt.darkGreen, outcolor=QtCore.Qt.darkMagenta,
             #                             midpenWidth=0, outpenWidth=3)
             #self.data.addToDrawArray(bantemp[0])
             #self.data.addToDrawArray(bantemp[1])
             #self.data.addToDrawArray(bantemp[2])
-            #bantemp=self.data.calHmaBand(int(30*DataAnalysis.fibo), mul=DataAnalysis.fibo*3.5,
-            #                             midcolor=QtCore.Qt.darkGreen, outcolor=QtCore.Qt.darkMagenta,
+            #bantemp=self.data.calHmaBand(int(90*DataAnalysis.fibo), mul=DataAnalysis.fibo*10,
+            #                             midcolor=QtCore.Qt.lightGray, outcolor=QtCore.Qt.magenta,
             #                             midpenWidth=0, outpenWidth=3)
             #self.data.addToDrawArray(bantemp[0])
             #self.data.addToDrawArray(bantemp[1])
@@ -709,7 +722,7 @@ class DrawQuote(QtGui.QMainWindow):
             #                         penWidth=0)
             #self.data.addToDrawArray(matemp[0])
             #self.data.addToDrawArray(matemp[1])
-            self.data.addToDrawArray(matemp[2])
+            #self.data.addToDrawArray(matemp[2])
 
         except Exception as e:
             self.toLog(traceback.format_exc())

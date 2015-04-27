@@ -1,3 +1,7 @@
+#   X00_0B  2015/04/27  K.K.Chien
+#       1. left button click will show detail assistant data
+#       2. right button click will enable/disable cross line
+#       3. windows deactive will clear cross line
 #   X00_0A  2015/04/22  K.K.Chien
 #       1. correct calMa isue
 #       2. add calHmaBand
