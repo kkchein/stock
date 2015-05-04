@@ -1,3 +1,5 @@
+#   X00_0C  2015/05/04  K.K.Chien
+#       1. add filename string in yahooFinance and googleFinance
 #   X00_0B  2015/04/27  K.K.Chien
 #       1. left button click will show detail assistant data
 #       2. right button click will enable/disable cross line

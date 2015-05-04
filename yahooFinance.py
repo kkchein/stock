@@ -9,7 +9,6 @@ import csv
 import sys
 import os
 from dataAnalysis import *
-
 #"http://ichart.yahoo.com/table.csv?s=^TWII&a=2&b=2&c=2014"
 #"http://finance.yahoo.com/d/quotes.csv?s=^TWII&f=p0ohgc1"
 #p0 - last close value
@@ -19,12 +18,6 @@ from dataAnalysis import *
 #c1 - change
 
 class YFClass():
-    yfDate=0
-    yfStart=1
-    yfHigh=2
-    yfLow=3
-    yfEnd=4
-    yfVol=5
     def __init__ (self):
         """constructor
 
@@ -124,14 +117,11 @@ class YFClass():
         else:
             lastdt=datetime.datetime(1985, 1, 1, 0, 0, 0)
         self.getHistoryData(ilist, isymbol, lastdt)
-def symbol2Filename (isymbol):
-    return symbolstr.replace("^","Index_")
 if __name__ == "__main__":
-    #^TWII
-    symbollist=["^STI",     #^STI - 新加坡海峽時報指數
-                "^JKSE"]    #^JKSE - 印尼雅加達綜合指數 Jakarta Composite Index
+    symbollist=[[ "^STI",'Idx_STI'],     #^STI - 新加坡海峽時報指數
+                ["^JKSE",'Idx_JKSE']]    #^JKSE - 印尼雅加達綜合指數 Jakarta Composite Index
     yfc=YFClass()
-    array=[]
+    #array=[]
     #yfc.getHistoryData(array)
     #yfc.list2csv("temp.csv", array)
     #yfc.csv2list("temp.csv", array)
@@ -140,14 +130,14 @@ if __name__ == "__main__":
         csvdir="./csv/"
     else:
         csvdir="./"
-    for symbolstr in symbollist:
+    for icount in range(len(symbollist)):
+        #print('{0:s} : {1:s}'.format(symbollist[icount][0],symbollist[icount][1]))
         array=[]
-        filename=csvdir+symbol2Filename(symbolstr)
-        print(filename+" processing...")
+        filename=csvdir+symbollist[icount][1]
         sys.stdout.flush()
         da.csv2list(filename+".csv", array)
         lastlen=len(array)
-        yfc.getLatest2List(isymbol=symbolstr, ilist=array)
+        yfc.getLatest2List(isymbol=symbollist[icount][0], ilist=array)
         newlen=len(array)
         da.list2csv(filename+".csv", array)
         print("New add {0:d} data".format(newlen-lastlen))

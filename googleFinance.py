@@ -133,32 +133,41 @@ class GFClass():
         else:
             lastdt=datetime.datetime(1985, 1, 1, 0, 0, 0)
         self.getHistoryData(ilist, isymbol, lastdt)
-def symbol2Filename (isymbol):
-    return symbolstr.replace(":","")
+#def symbol2Filename (isymbol):
+#    return symbolstr.replace(":","")
 if __name__ == "__main__":
-    symbollist=["TPE:2330",             #縩筿
-                "TPE:2382",             #約笷
-                "TPE:2395",             #地
-                "TPE:0050",             #芖50
-                "TPE:0061",             #腳涵瞏
-                "TPE:2002",             #い葵
-                "TPE:TAIEX",            #芖舦计
-                "INDEXNIKKEI:NI225",    #ら竒
-                "INDEXBOM:SENSEX"]      #﹕禦庇稰30计BSE SENSEX
+    symbollist=[["TPE:2330"         ,"Stock_TSMC"],         #縩筿
+                ["TPE:2382"         ,"Stock_QUANTA"],       #約笷
+                ["TPE:2395"         ,"Stock_ADVANTECH"],    #地
+                ["TPE:2002"         ,"Stock_ChinaSteel"],   #い葵
+                ["TPE:0061"         ,"ETF_PLShaneHai"],     #腳涵瞏
+                ["INDEXNIKKEI:NI225","Index_JapanNI225"],   #ら竒
+                ["TPE:TAIEX"        ,"Index_TaiwanWI"],     #芖舦计
+                ["INDEXBOM:SENSEX"  ,"Index_India"],        #﹕禦庇稰30计BSE SENSEX
+                ]
+    #symbollist=["TPE:2330",             #縩筿
+    #            "TPE:2382",             #約笷
+    #            "TPE:2395",             #地
+    #            "TPE:0050",             #芖50
+    #            "TPE:0061",             #腳涵瞏
+    #            "TPE:2002",             #い葵
+    #            "TPE:TAIEX",            #芖舦计
+    #            "INDEXNIKKEI:NI225",    #ら竒
+    #            "INDEXBOM:SENSEX"]      #﹕禦庇稰30计BSE SENSEX
     gfc=GFClass()
     da=DataAnalysis()
     if os.path.exists("./csv")==True:
         csvdir="./csv/"
     else:
         csvdir="./"
-    for symbolstr in symbollist:
+    for icount in range(len(symbollist)):
         array=[]
-        filename=csvdir+symbol2Filename(symbolstr)
+        filename=csvdir+symbollist[icount][1]
         print(filename+".csv processing...")
         sys.stdout.flush()
         da.csv2list(filename+".csv", array)
         lastlen=len(array)
-        gfc.getLatest2List(isymbol=symbolstr, ilist=array)
+        gfc.getLatest2List(isymbol=symbollist[icount][0], ilist=array)
         newlen=len(array)
         da.list2csv(filename+".csv", array)
         print("New add {0:d} data".format(newlen-lastlen))
@@ -168,5 +177,23 @@ if __name__ == "__main__":
         rarray=[]
         da.listReduce(array, rarray)
         da.list2csv(filename+"_2.csv", rarray)
+
+    #for symbolstr in symbollist:
+    #    array=[]
+    #    filename=csvdir+symbol2Filename(symbolstr)
+    #    print(filename+".csv processing...")
+    #    sys.stdout.flush()
+    #    da.csv2list(filename+".csv", array)
+    #    lastlen=len(array)
+    #    gfc.getLatest2List(isymbol=symbolstr, ilist=array)
+    #    newlen=len(array)
+    #    da.list2csv(filename+".csv", array)
+    #    print("New add {0:d} data".format(newlen-lastlen))
+    #    #for icount in range(len(array)):
+    #    #    print(array[icount])
+    #    print(filename+"_2.csv processing...")
+    #    rarray=[]
+    #    da.listReduce(array, rarray)
+    #    da.list2csv(filename+"_2.csv", rarray)
 
     
