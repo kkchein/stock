@@ -299,8 +299,11 @@ class DrawQuote(QtGui.QMainWindow):
                         if laststr!=strtemp:
                             laststr=strtemp
                             resultstr=resultstr+"\n"
-                        resultstr=resultstr+"{0:s} : {1:.2f};  ".format(self.data.drawDataArray[icount].caption,
-                                                                        self.data.drawDataArray[icount][ipos])
+                        try:
+                            resultstr=resultstr+"{0:s} : {1:.2f};  ".format(self.data.drawDataArray[icount].caption,
+                                                                            self.data.drawDataArray[icount][ipos])
+                        except IndexError:
+                            resultstr=''
                     if resultstr!="":
                         self.toLog(resultstr)
             elif event.button() == QtCore.Qt.RightButton:
@@ -365,7 +368,7 @@ class DrawQuote(QtGui.QMainWindow):
         Returns:
         Raises:
         """
-        return ipos*self.posW+self.posW/2
+        return ipos*self.posW#+self.posW/2
     def pos2Scene (self, ipos):
         """convert stick position to graphicsSecne coordinate
 
@@ -703,6 +706,8 @@ class DrawQuote(QtGui.QMainWindow):
             self.data.addToDrawArray(matemp[0])
             self.data.addToDrawArray(matemp[1])
             self.data.addToDrawArray(matemp[2])
+            matemp=self.data.calATR(int(18*DataAnalysis.fibo))
+            self.data.addToDrawArray(matemp)
             ###
             #bantemp=self.data.calHmaBand(int(30*DataAnalysis.fibo), mul=DataAnalysis.fibo*3.5,
             #                             midcolor=QtCore.Qt.darkGreen, outcolor=QtCore.Qt.darkMagenta,
@@ -723,6 +728,8 @@ class DrawQuote(QtGui.QMainWindow):
             #self.data.addToDrawArray(matemp[0])
             #self.data.addToDrawArray(matemp[1])
             #self.data.addToDrawArray(matemp[2])
+            #matemp=self.data.calATR(int(18*DataAnalysis.fibo))
+            #self.data.addToDrawArray(matemp)
 
         except Exception as e:
             self.toLog(traceback.format_exc())

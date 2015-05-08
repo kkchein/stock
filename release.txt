@@ -1,3 +1,7 @@
+#   X00_0D  2015/05/08  K.K.Chien
+#       1. add calATR function
+#       2. correct pos2X issue (crosse line issue)
+#       3. correct out of range when left click with no data
 #   X00_0C  2015/05/04  K.K.Chien
 #       1. add filename string in yahooFinance and googleFinance
 #   X00_0B  2015/04/27  K.K.Chien

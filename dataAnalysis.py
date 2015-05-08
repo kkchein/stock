@@ -14,6 +14,7 @@ class DrawData:
     dtypeNone=0
     dtypeLine=1
     dtypeDiff=2
+    dtypeValue=3
     def __init__ (self):
         """constructor
 
@@ -241,12 +242,11 @@ class DataAnalysis():
             return None
         if len(self.drawDataArray)>0:
             for icount in range(len(self.drawDataArray)):
-                if self.drawDataArray[icount].drawType==DrawData.dtypeDiff:
-                    continue
-                if result[DataAnalysis.boundaryMax]<self.drawDataArray[icount].data[ipos]:
-                    result[DataAnalysis.boundaryMax]=self.drawDataArray[icount].data[ipos]
-                if result[DataAnalysis.boundaryMin]>self.drawDataArray[icount].data[ipos] and self.drawDataArray[icount].data[ipos]!=0:
-                    result[DataAnalysis.boundaryMin]=self.drawDataArray[icount].data[ipos]
+                if self.drawDataArray[icount].drawType==DrawData.dtypeLine:
+                    if result[DataAnalysis.boundaryMax]<self.drawDataArray[icount].data[ipos]:
+                        result[DataAnalysis.boundaryMax]=self.drawDataArray[icount].data[ipos]
+                    if result[DataAnalysis.boundaryMin]>self.drawDataArray[icount].data[ipos] and self.drawDataArray[icount].data[ipos]!=0:
+                        result[DataAnalysis.boundaryMin]=self.drawDataArray[icount].data[ipos]
         return result
     def getValueBoundaryForLastN (self, inum, startNum=0):
         """get highest and lowest value in number data
@@ -659,18 +659,50 @@ class DataAnalysis():
             #hiBand.data.append(midBand.data[icount]+temph*mul)
             #loBand.data.append(midBand.data[icount]-templ*mul)
         return [hiBand, midBand, loBand]
+    def calATR (self, period, mul=1, capStr=""):
+        if len(self.sourceData)==0:
+            return None
+        if capStr=="":
+            rstr="ATR{0:d}".format(period)
+        else:
+            rstr=capStr
+        self.sourceData[0][DataAnalysis.gfEnd]
+        vatemp=DrawData()
+        for icount in range(len(self.sourceData)):
+            if icount==0:
+                rtemp=math.fabs(self.sourceData[icount][DataAnalysis.gfHigh]-self.sourceData[icount][DataAnalysis.gfLow])
+                vatemp.data.append(rtemp)
+            else:
+                rtemp=math.fabs(self.sourceData[icount][DataAnalysis.gfHigh]-self.sourceData[icount-1][DataAnalysis.gfLow])
+                stemp=math.fabs(self.sourceData[icount][DataAnalysis.gfHigh]-self.sourceData[icount-1][DataAnalysis.gfEnd])
+                if stemp>rtemp:
+                    rtemp=stemp
+                stemp=math.fabs(self.sourceData[icount][DataAnalysis.gfLow]-self.sourceData[icount-1][DataAnalysis.gfEnd])
+                if stemp>rtemp:
+                    rtemp=stemp
+                vatemp.data.append(rtemp)
+        #for item in vatemp.data:
+        #    print(item)
+        result=self.calHMA(period,vatemp,rstr)
+        result.drawType=DrawData.dtypeValue
+        return result
+
+
 if __name__ == "__main__":
     data=DataAnalysis()
     data.loadFromCSV("./csv/test.csv")
-    bantemp=data.calEmaBand(int(90*DataAnalysis.fibo), mul=DataAnalysis.fibo*12,
-                            midcolor=QtCore.Qt.darkGreen, outcolor=QtCore.Qt.darkMagenta,
-                            midpenWidth=0, outpenWidth=3)
+    temp=data.calATR(14)
+    for item in temp.data:
+        print(item)
+    #bantemp=data.calEmaBand(int(90*DataAnalysis.fibo), mul=DataAnalysis.fibo*12,
+    #                        midcolor=QtCore.Qt.darkGreen, outcolor=QtCore.Qt.darkMagenta,
+    #                        midpenWidth=0, outpenWidth=3)
     #print(bantemp[0])
     #print(bantemp[0][0])
     #print(bantemp[0][1])
-    data.addToDrawArray(bantemp[0])
-    data.addToDrawArray(bantemp[1])
-    data.addToDrawArray(bantemp[2])
+    #data.addToDrawArray(bantemp[0])
+    #data.addToDrawArray(bantemp[1])
+    #data.addToDrawArray(bantemp[2])
     #result=data.getValueBoundary()
     #result=data.getValueBoundaryForLastN(5)
     #print("1: {0:f} 2: {1:f}".format(result[0], result[1]))

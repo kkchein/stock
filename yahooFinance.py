@@ -9,6 +9,9 @@ import csv
 import sys
 import os
 from dataAnalysis import *
+#dt=datetime.datetime.fromtimestamp(int("1430716686"))
+#print(dt.strftime('%Y%m%d %H:%M:%S'))
+#print(time.mktime(dt.timetuple()))
 #"http://ichart.yahoo.com/table.csv?s=^TWII&a=2&b=2&c=2014"
 #"http://finance.yahoo.com/d/quotes.csv?s=^TWII&f=p0ohgc1"
 #p0 - last close value
@@ -119,7 +122,10 @@ class YFClass():
         self.getHistoryData(ilist, isymbol, lastdt)
 if __name__ == "__main__":
     symbollist=[[ "^STI",'Idx_STI'],     #^STI - 新加坡海峽時報指數
-                ["^JKSE",'Idx_JKSE']]    #^JKSE - 印尼雅加達綜合指數 Jakarta Composite Index
+                ["^JKSE",'Idx_JKSE'],    #^JKSE - 印尼雅加達綜合指數 Jakarta Composite Index
+                ]
+    #symbollist2=[["XAUUSD=X","GOLD"],   #XAUUSD=X - 黃金現價
+    #             ]
     yfc=YFClass()
     #array=[]
     #yfc.getHistoryData(array)
@@ -145,4 +151,5 @@ if __name__ == "__main__":
         rarray=[]
         da.listReduce(array, rarray)
         da.list2csv(filename+"_2.csv", rarray)
+    #for icount in range(len(symbollist2)):
 
