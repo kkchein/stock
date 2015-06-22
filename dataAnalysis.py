@@ -74,6 +74,7 @@ class DataAnalysis():
     gfEnd=4
     gfVol=5
     dataStrType="%Y/%m/%d"
+    dataStrType2='%Y%m%d%H%M%S'
     def __init__ (self):
         """constructor
 
@@ -128,7 +129,13 @@ class DataAnalysis():
             return
         csvContent=csv.reader(csvFileR, delimiter=',')
         for i in csvContent:
-            dt = datetime.datetime.fromtimestamp(time.mktime(time.strptime(i[0], DataAnalysis.dataStrType)))
+            try:
+                dt = datetime.datetime.fromtimestamp(time.mktime(time.strptime(i[0], DataAnalysis.dataStrType)))
+            except ValueError:
+                try:
+                    dt = datetime.datetime.fromtimestamp(time.mktime(time.strptime(i[0], DataAnalysis.dataStrType2)))
+                except:
+                    continue
             try:
                 openValue=float(i[1].replace(",",""))
             except ValueError:
